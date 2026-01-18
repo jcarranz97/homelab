@@ -1,0 +1,77 @@
+site_name: Homelab
+site_description: My personal homelab documentation.
+
+repo_name: jcarranz97/homelab
+repo_url: https://github.com/jcarranz97/homelab
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - toc.integrate
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Infrastructure:
+      - Overview: infrastructure/overview.md
+      - Hardware: infrastructure/hardware.md
+      - Network: infrastructure/network.md
+      - Kubernetes Cluster: infrastructure/kubernetes.md
+  - Services:
+      - Overview: services/overview.md
+      - Registry (Harbor): services/harbor.md
+      - Monitoring: services/monitoring.md
+  - Guides & How-tos:
+      - Harbor & K8s Deployment: guides/harbor-k8s-deployment.md
+      - Getting Started: guides/getting-started.md
+  - Troubleshooting:
+      - Common Issues: troubleshooting/common-issues.md
+  - Reference:
+      - Configuration Files: reference/configs.md
+      - Useful Commands: reference/commands.md
+      - Resources: reference/resources.md
+  - Repository:
+      - Development Setup: repository/development-setup.md
+      - Code Quality Tools: repository/code-quality.md
+      - Technologies Used: repository/technologies.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - footnotes
+  - attr_list
+  - md_in_html
+  - tables
+
+plugins:
+  - search
+
+extra_javascript:
+  - https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js
