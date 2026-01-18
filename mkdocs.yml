@@ -63,6 +63,8 @@ markdown_extensions:
           class: mermaid
   - pymdownx.highlight:
       anchor_linenums: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - footnotes
