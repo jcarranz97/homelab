@@ -143,8 +143,75 @@ graph TD
 
 - **Issues**: Bug tracking and feature requests
 - **Pull Requests**: Code review and collaboration
-- **GitHub Pages**: Documentation hosting (if configured)
-- **Actions**: CI/CD automation (if configured)
+- **GitHub Pages**: Documentation hosting for the live site
+- **GitHub Actions**: Automated documentation deployment
+
+#### GitHub Pages Hosting
+
+**Purpose**: Free static site hosting directly from the GitHub repository
+
+**Configuration**:
+
+- **Source**: `gh-pages` branch (automatically managed)
+- **Custom domain**: Available for custom domain setup
+- **HTTPS**: Automatically enabled with SSL certificates
+- **CDN**: Global content delivery network included
+
+**Integration with MkDocs**:
+
+- **Deployment command**: `mkdocs gh-deploy` handles the entire process
+- **Static site generation**: MkDocs builds HTML/CSS/JS from markdown
+- **Automatic branch management**: Creates and manages `gh-pages` branch
+- **Asset optimization**: Compresses and optimizes static assets
+
+**Benefits**:
+
+- **Zero cost**: Free hosting for public repositories
+- **Automatic SSL**: HTTPS enabled by default
+- **Global CDN**: Fast loading worldwide
+- **Version control**: Full deployment history in git
+- **Easy rollback**: Can revert to previous deployments
+- **Custom domains**: Support for custom domain names
+
+**Access**:
+
+- **Live site**: Available at `https://jcarranz97.github.io/homelab/`
+- **Automatic updates**: Deploys within minutes of main branch changes
+- **Mobile responsive**: Material theme works perfectly on all devices
+
+#### GitHub Actions Workflow
+
+The repository uses GitHub Actions for automated documentation deployment:
+
+**Workflow File**: `.github/workflows/deploy-docs.yml`
+
+**Triggers**:
+
+- **Main branch pushes**: Automatically builds and deploys to GitHub Pages
+- **Pull requests**: Builds documentation to test for errors (no deployment)
+
+**Key Features**:
+
+- **Automated deployment**: Uses `mkdocs gh-deploy` for GitHub Pages
+- **Dependency caching**: Speeds up builds with pip cache
+- **Git credentials**: Configured for github-actions bot
+- **Build validation**: PRs are tested before merge
+- **Force deployment**: Ensures latest version is always live
+
+**Workflow Steps**:
+
+1. Checkout repository with full history
+2. Set up Python 3.x environment
+3. Cache MkDocs dependencies
+4. Install mkdocs-material
+5. Build and deploy (main) or build-only (PRs)
+
+**Benefits**:
+
+- **Zero-maintenance deployment**: Documentation updates automatically
+- **Preview protection**: PRs are tested but not deployed
+- **Fast builds**: Dependency caching reduces build time
+- **Reliable**: Uses official GitHub Actions and established workflows
 
 ## File Formats and Standards
 
@@ -300,9 +367,9 @@ node.js >= 16
 
 ### Short Term
 
-- **GitHub Actions**: Automated builds and deployments
 - **Link checking**: Automated link validation
 - **Dependency updates**: Automated tool updates
+- **Additional GitHub Actions**: PR quality checks, security scanning
 
 ### Long Term
 
