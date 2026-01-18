@@ -1,10 +1,17 @@
 #!/bin/bash
 
 # Hardware Information Extraction Script for Homelab Documentation
-# Provides clean, copy-paste ready format for hardware table
+# Provides hardware specifications in table order
 
 echo "Node: $(hostname)"
 echo
+
+# Hardware Information
+HARDWARE_VENDOR=$(hostnamectl | grep "Hardware Vendor" | cut -d: -f2 | xargs)
+HARDWARE_MODEL=$(hostnamectl | grep "Hardware Model" | cut -d: -f2 | xargs)
+CHASSIS=$(hostnamectl | grep "Chassis" | cut -d: -f2 | xargs | sed 's/🖥️//')
+ARCHITECTURE=$(hostnamectl | grep "Architecture" | cut -d: -f2 | xargs)
+echo "Hardware: $HARDWARE_VENDOR $HARDWARE_MODEL ($CHASSIS, $ARCHITECTURE)"
 
 # CPU Information
 CPU_MODEL=$(lscpu | grep "Model name" | sed 's/Model name:[[:space:]]*//' | head -1)
@@ -15,13 +22,6 @@ TOTAL_THREADS=$((CORES_PER_SOCKET * THREADS_PER_CORE))
 # Clean up CPU model name - remove extra text and normalize
 CPU_CLEAN=$(echo "$CPU_MODEL" | sed 's/([^)]*CPU[^)]*)//g' | sed 's/  */ /g' | xargs)
 echo "CPU: $CPU_CLEAN ($CORES_PER_SOCKET cores, $TOTAL_THREADS threads)"
-
-# Hardware Information
-HARDWARE_VENDOR=$(hostnamectl | grep "Hardware Vendor" | cut -d: -f2 | xargs)
-HARDWARE_MODEL=$(hostnamectl | grep "Hardware Model" | cut -d: -f2 | xargs)
-CHASSIS=$(hostnamectl | grep "Chassis" | cut -d: -f2 | xargs | sed 's/🖥️//')
-ARCHITECTURE=$(hostnamectl | grep "Architecture" | cut -d: -f2 | xargs)
-echo "Hardware: $HARDWARE_VENDOR $HARDWARE_MODEL ($CHASSIS, $ARCHITECTURE)"
 
 # Memory Information
 # Try to get hardware details first, fallback to free -h if dmidecode fails
@@ -99,11 +99,3 @@ if [ ! -z "$ETH_INTERFACE" ] && [ ! -z "$MTU" ]; then
 else
     echo "Network: Gigabit Ethernet"
 fi
-
-# OS Information
-OS_INFO=$(hostnamectl | grep "Operating System" | cut -d: -f2 | xargs)
-echo "OS: $OS_INFO"
-
-# Kernel Information
-KERNEL_VERSION=$(uname -r)
-echo "Kernel: $KERNEL_VERSION"

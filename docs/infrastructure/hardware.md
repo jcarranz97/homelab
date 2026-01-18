@@ -4,38 +4,59 @@ This page documents the physical hardware powering my homelab.
 
 ## Cluster Nodes
 
-### Master Node
+| Attribute | dell-01 (Control Plane) | nuc-01 (Worker) |
+|-----------|-------------------------|-----------------|
+| **Hardware** | Dell Inc. OptiPlex 9020 (desktop , x86-64) | Intel corporation NUC6i5SYB (desktop , x86-64) |
+| **CPU** | Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz (4 cores, 8 threads) | Intel(R) Core(TM) i5-6260U CPU @ 1.80GHz (2 cores, 4 threads) |
+| **Memory** | 8GB DDR3 @ 1600 MT/s (HMT351U6EFR8C-PB) - 2/4 slots used | 16GB DDR4 @ 2133 MT/s (KHX2133C13S4/8G) - 2/2 slots used |
+| **Storage** | 931.5GB HDD (LVM managed, 915GB usable) | 465.8GB HDD (LVM managed, 466GB usable) |
+| **Network** | Gigabit Ethernet (eno1 interface, 1500 MTU) | Gigabit Ethernet (eno1 interface, 1500 MTU) |
 
-- **Hostname**: [Your master node hostname]
-- **CPU**: [CPU specs - e.g., Intel i5-8400 6-core]
-- **Memory**: [RAM amount - e.g., 16GB DDR4]
-- **Storage**: [Storage details - e.g., 256GB SSD]
-- **Network**: [Network interface - e.g., Gigabit Ethernet]
-- **OS**: [Operating system - e.g., Ubuntu 22.04 LTS]
+??? tip "Gathering Hardware Details"
 
-### Worker Nodes
+    Use the automated hardware information script for consistent data collection:
 
-#### Node 1
+    ```bash
+    # Download and run the hardware info script
+    wget https://raw.githubusercontent.com/jcarranz97/homelab/main/scripts/get-hardware-info.sh
+    chmod +x get-hardware-info.sh
+    ./get-hardware-info.sh
+    ```
 
-- **Hostname**: [Worker node 1 hostname]
-- **CPU**: [CPU specs]
-- **Memory**: [RAM amount]
-- **Storage**: [Storage details]
-- **Network**: [Network interface]
-- **OS**: [Operating system]
+    Or if you have the repository locally:
 
-#### Node 2
+    ```bash
+    # Run from the homelab repository
+    ./get-hardware-info.sh
+    ```
 
-- **Hostname**: [Worker node 2 hostname]
-- **CPU**: [CPU specs]
-- **Memory**: [RAM amount]
-- **Storage**: [Storage details]
-- **Network**: [Network interface]
-- **OS**: [Operating system]
+    The script provides formatted output ready for documentation updates:
 
-## Additional Nodes
+    ```bash
+    homelab@nuc-01:~$ ./get-hardware-info.sh
+    Node: nuc-01
 
-Add more nodes as needed
+    CPU: Intel(R) Core(TM) i5-6260U CPU @ 1.80GHz (2 cores, 4 threads)
+    Hardware: Intel corporation NUC6i5SYB (desktop , x86-64)
+    Memory: 15GiB RAM
+    Storage: 465.8GB storage (466GB usable)
+    Network: Gigabit Ethernet (eno1 interface, 1500 MTU)
+    OS: Ubuntu 24.04.3 LTS
+    Kernel: 6.8.0-88-generic
+    ```
+
+## Cluster Status
+
+Current Kubernetes cluster operational state:
+
+| Node    | Status | Role              | Version      | OS               | Kernel         | Runtime            |
+|---------|--------|-------------------|--------------|------------------|----------------|--------------------|
+| dell-01 | Ready  | control-plane,master | v1.33.4+k3s1 | Ubuntu 24.04.3 LTS | 6.8.0-88-generic | containerd://2.0.5-k3s2 |
+| nuc-01  | Ready  | worker            | v1.33.4+k3s1 | Ubuntu 24.04.3 LTS | 6.8.0-88-generic | containerd://2.0.5-k3s2 |
+
+!!! tip "Real-time Cluster Status"
+
+    Get current cluster state with: `kubectl get nodes -o wide`
 
 ## Network Equipment
 
