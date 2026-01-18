@@ -15,9 +15,9 @@ My homelab is built around a Kubernetes cluster that provides:
 
 ### Kubernetes Cluster
 
-- **Type**: [Add your cluster type - kubeadm, k3s, etc.]
-- **Nodes**: [Add number and specs of nodes]
-- **Version**: [Add K8s version]
+- **Type**: k3s (Lightweight Kubernetes distribution)
+- **Nodes**: 2 total - 1 control plane, 1 worker node ([Hardware details](hardware.md))
+- **Version**: v1.33.4+k3s1
 
 ### Container Registry
 
