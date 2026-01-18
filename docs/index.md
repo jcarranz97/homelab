@@ -28,6 +28,7 @@ My homelab consists of:
 - 📚 **[Guides & How-tos](guides/getting-started.md)**: Step-by-step tutorials and deployment guides
 - 🔧 **[Troubleshooting](troubleshooting/common-issues.md)**: Solutions to common issues I've encountered
 - 📖 **[Reference](reference/configs.md)**: Configuration files, commands, and useful resources
+- 🔗 **[Repository](repository/technologies.md)**: Development setup, code quality tools, and project technologies
 
 ## Getting Started
 
