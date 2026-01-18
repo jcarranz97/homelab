@@ -20,29 +20,30 @@ This page documents the physical hardware powering my homelab.
     # Download and run the hardware info script
     wget https://raw.githubusercontent.com/jcarranz97/homelab/main/scripts/get-hardware-info.sh
     chmod +x get-hardware-info.sh
-    ./get-hardware-info.sh
+    sudo ./get-hardware-info.sh
     ```
 
     Or if you have the repository locally:
 
     ```bash
     # Run from the homelab repository
-    ./get-hardware-info.sh
+    sudo ./scripts/get-hardware-info.sh
     ```
+
+    !!! warning "Sudo Required"
+        The script requires sudo privileges to access detailed hardware information via `dmidecode`, which provides accurate memory specifications including DDR type, speed, part numbers, and slot usage.
 
     The script provides formatted output ready for documentation updates:
 
     ```bash
-    homelab@nuc-01:~$ ./get-hardware-info.sh
-    Node: nuc-01
+    root@dell-01:/home/homelab# ./get-hardware-info.sh
+    Node: dell-01
 
-    CPU: Intel(R) Core(TM) i5-6260U CPU @ 1.80GHz (2 cores, 4 threads)
-    Hardware: Intel corporation NUC6i5SYB (desktop , x86-64)
-    Memory: 15GiB RAM
-    Storage: 465.8GB storage (466GB usable)
+    Hardware: Dell Inc. OptiPlex 9020 (desktop , x86-64)
+    CPU: Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz (4 cores, 8 threads)
+    Memory: 8GB DDR3 @ 1600 MT/s (HMT351U6EFR8C-PB) - 2/4 slots used
+    Storage: 931.5GB HDD (LVM managed, 915GB usable)
     Network: Gigabit Ethernet (eno1 interface, 1500 MTU)
-    OS: Ubuntu 24.04.3 LTS
-    Kernel: 6.8.0-88-generic
     ```
 
 ## Cluster Status
