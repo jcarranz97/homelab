@@ -86,14 +86,14 @@ kubectl create secret docker-registry harbor-secret \
   --namespace=test-namespace
 ```
 
-### 3.2 Update Deployment Configuration
+### 3.2 Update Deployment and Service Configuration
 
 Update the deployment YAML to use your Harbor image. The current configuration
 should be modified to use Harbor instead of ghcr.io:
 
-**Current deployment configuration** ([fast-api-docker-deployment.yaml](fast-api-docker-deployment.yaml)):
+**Deployment configuration**:
 
-```yaml
+```yaml title="fast-api-docker-deployment.yaml"
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -125,6 +125,27 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "100m"
+```
+
+**Service configuration**:
+
+```yaml title="fast-api-docker-service.yaml"
+apiVersion: v1
+kind: Service
+metadata:
+  name: fast-api-docker-service
+  namespace: test-namespace
+  labels:
+    app: fast-api-docker
+spec:
+  type: NodePort
+  selector:
+    app: fast-api-docker
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
 ```
 
 ### 3.3 Deploy to Kubernetes
