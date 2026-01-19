@@ -66,6 +66,14 @@ Harbor integrates with Kubernetes through:
 2. **Admission Controllers**: For image policy enforcement
 3. **Webhooks**: For automated deployment triggers
 
+### Important: HTTP Registry Configuration
+
+**Before deploying to Kubernetes**, you must configure all cluster nodes to allow HTTP connections to Harbor,
+since the registry runs on HTTP (not HTTPS).
+
+⚠️ **Required Step**: Follow the [K8s Harbor HTTP Registry Configuration Guide](../guides/k8s-harbor-http-registry.md)
+to configure your cluster nodes. Without this configuration, pods will fail with `ImagePullBackOff` errors.
+
 ### Creating Pull Secrets
 
 ```bash
@@ -83,8 +91,24 @@ kubectl create secret docker-registry harbor-secret \
 - **Login failures**: Check credentials and network connectivity
 - **Push failures**: Verify project exists and you have push permissions
 - **Pull failures in K8s**: Ensure pull secrets are properly configured
+- **ImagePullBackOff errors**: Verify nodes are configured for HTTP registry access (see [K8s HTTP Registry Guide](../guides/k8s-harbor-http-registry.md))
+- **HTTPS client errors**: Configure cluster nodes to allow HTTP connections to Harbor
+
+### Quick Fixes
+
+```bash
+# Test Harbor connectivity
+curl http://192.168.1.206:30002/v2/
+
+# Check if nodes can access Harbor
+kubectl describe pod <failing-pod> -n <namespace>
+
+# Verify pull secret exists
+kubectl get secrets -n <namespace>
+```
 
 ## References
 
 - [Harbor Documentation](https://goharbor.io/docs/)
 - [Harbor & K8s Deployment Guide](../guides/harbor-k8s-deployment.md)
+- [K8s Harbor HTTP Registry Configuration](../guides/k8s-harbor-http-registry.md)

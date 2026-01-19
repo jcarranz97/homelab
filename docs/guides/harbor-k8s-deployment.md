@@ -44,7 +44,7 @@ Build the image with proper Harbor registry tagging:
 
 ```bash
 # Replace 'your-project' with your actual Harbor project name
-docker build -t 192.168.1.206:30002/your-project/fast-api-docker:latest .
+docker build -t 192.168.1.206:30002/library/fast-api-docker:latest .
 ```
 
 ### 2.2 Tag Image (if needed)
@@ -52,13 +52,13 @@ docker build -t 192.168.1.206:30002/your-project/fast-api-docker:latest .
 If you built with a different tag initially, retag it:
 
 ```bash
-docker tag fast-api-docker:latest 192.168.1.206:30002/your-project/fast-api-docker:latest
+docker tag fast-api-docker:latest 192.168.1.206:30002/library/fast-api-docker:latest
 ```
 
 ### 2.3 Push to Harbor Registry
 
 ```bash
-docker push 192.168.1.206:30002/your-project/fast-api-docker:latest
+docker push 192.168.1.206:30002/library/fast-api-docker:latest
 ```
 
 ### 2.4 Verify Image in Harbor
@@ -69,6 +69,10 @@ docker push 192.168.1.206:30002/your-project/fast-api-docker:latest
 4. Check that the `latest` tag is available
 
 ## 3. Kubernetes Deployment
+
+> **⚠️ Important**: Before deploying to Kubernetes, ensure your cluster is configured to work with
+> Harbor's HTTP registry. If you encounter `ImagePullBackOff` or HTTPS client errors, follow the
+> [K8s Harbor HTTP Registry Setup Guide](k8s-harbor-http-registry.md) to configure all cluster nodes properly.
 
 ### 3.1 Create Harbor Secret for Kubernetes
 
@@ -111,7 +115,7 @@ spec:
       - name: harbor-secret  # Updated secret name
       containers:
       - name: fast-api-docker
-        image: 192.168.1.206:30002/your-project/fast-api-docker:latest  # Updated image
+        image: 192.168.1.206:30002/library/fast-api-docker:latest  # Updated image
         ports:
         - containerPort: 80
         resources:
@@ -214,8 +218,12 @@ kubectl rollout undo deployment/fast-api-docker -n test-namespace
 
 ### 5.1 Common Issues
 
+**For detailed troubleshooting of Harbor HTTP registry issues**, see the [K8s Harbor HTTP Registry Troubleshooting Guide](../troubleshooting/k8s-harbor-http-registry.md).
+
 **Image Pull Errors:**
 
+- **HTTP/HTTPS client errors**: Follow the
+  [K8s Harbor HTTP Registry Setup Guide](k8s-harbor-http-registry.md) to configure cluster nodes
 - Verify Harbor credentials are correct
 - Check if the secret `harbor-secret` exists in the correct namespace
 - Ensure the image path is correct in the deployment YAML
