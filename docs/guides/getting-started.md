@@ -64,11 +64,13 @@ Quick reference materials:
 
 1. **New to homelabs?** Start with the [Infrastructure Overview](../infrastructure/overview.md) to understand the setup
 
-2. **Want to deploy something?** Check the [Guides & How-tos](harbor-k8s-deployment.md) section for detailed tutorials
+2. **Setting up your own homelab?** Follow the [K8s Cluster Setup Guide](k8s-cluster-setup.md) for step-by-step instructions
 
-3. **Looking for a specific service?** Visit the [Services](../services/overview.md) section
+3. **Want to deploy something?** Check the [Guides & How-tos](harbor-k8s-deployment.md) section for detailed tutorials
 
-4. **Having issues?** Check [Troubleshooting](../troubleshooting/common-issues.md) for solutions
+4. **Looking for a specific service?** Visit the [Services](../services/overview.md) section
+
+5. **Having issues?** Check [Troubleshooting](../troubleshooting/common-issues.md) for solutions
 
 ## Prerequisites
 
@@ -87,6 +89,7 @@ This is my personal documentation, but if you find errors or have suggestions, f
 
 Ready to dive in? Here are some suggested paths:
 
+- **Setting Up Your Own**: [K8s Cluster Setup Guide](k8s-cluster-setup.md)
 - **Infrastructure Tour**: [Infrastructure Overview](../infrastructure/overview.md)
 - **First Deployment**: [Harbor & K8s Deployment Guide](harbor-k8s-deployment.md)
 - **Service Catalog**: [Services Overview](../services/overview.md)

@@ -41,10 +41,13 @@ nav:
       - Registry (Harbor): services/harbor.md
       - Monitoring: services/monitoring.md
   - Guides & How-tos:
+      - K8s Cluster Setup: guides/k8s-cluster-setup.md
       - Harbor & K8s Deployment: guides/harbor-k8s-deployment.md
+      - K8s Harbor HTTP Registry Setup: guides/k8s-harbor-http-registry.md
       - Getting Started: guides/getting-started.md
   - Troubleshooting:
       - Common Issues: troubleshooting/common-issues.md
+      - K8s Harbor HTTP Registry: troubleshooting/k8s-harbor-http-registry.md
   - Reference:
       - Configuration Files: reference/configs.md
       - Useful Commands: reference/commands.md
