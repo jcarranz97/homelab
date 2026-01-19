@@ -11,10 +11,10 @@
       
       
       
-        <link rel="prev" href="../../reference/resources/">
+        <link rel="prev" href="../common-issues/">
       
       
-        <link rel="next" href="../code-quality/">
+        <link rel="next" href="../../reference/configs/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Development Setup - Homelab</title>
+        <title>K8s Harbor HTTP Registry - Homelab</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#development-setup" class="md-skip">
+        <a href="#troubleshooting-k8s-harbor-http-registry-issues" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Development Setup
+              K8s Harbor HTTP Registry
             
           </span>
         </div>
@@ -303,11 +303,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../troubleshooting/common-issues/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../common-issues/" class="md-tabs__link">
           
   
   
@@ -343,13 +345,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../repository/development-setup/" class="md-tabs__link">
           
   
   
@@ -930,28 +930,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -969,7 +972,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -987,7 +990,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshooting/common-issues/" class="md-nav__link">
+      <a href="../common-issues/" class="md-nav__link">
         
   
   
@@ -1012,10 +1015,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../troubleshooting/k8s-harbor-http-registry/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Harbor HTTP Registry
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1031,6 +1061,359 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#registry-configuration-not-applied" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registry Configuration Not Applied
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#service-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Service Not Found
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#image-still-not-pulling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Image Still Not Pulling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification Commands
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-error-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Error Messages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Error Messages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#imagepullbackoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ImagePullBackOff
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#errimagepull" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ErrImagePull
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diagnostic-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Steps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Diagnostic Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-test-harbor-connectivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Test Harbor Connectivity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-verify-registry-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Verify Registry Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-check-kubernetes-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Check Kubernetes Resources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-test-image-pull-manually" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Test Image Pull Manually
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#node-specific-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Node-Specific Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Node-Specific Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#control-plane-vs-worker-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Control Plane vs Worker Nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixed-architecture-clusters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mixed Architecture Clusters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#harbor-not-accessible" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Harbor Not Accessible
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dns-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNS Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#yaml-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        YAML Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Related Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-desktop-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Desktop Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-registry-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple Registry Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting Help
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-resolution-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Resolution Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1192,31 +1575,28 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -1234,7 +1614,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1249,37 +1629,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Development Setup
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../repository/development-setup/" class="md-nav__link">
         
   
   
@@ -1295,354 +1648,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#getting-started" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Getting Started
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Getting Started">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prerequisites
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#initial-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Initial Setup
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#development-workflow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Development Workflow
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Development Workflow">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#running-the-documentation-locally" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running the Documentation Locally
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#making-changes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Making Changes
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#building-the-documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Building the Documentation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#file-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        File Structure
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#documentation-standards" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Documentation Standards
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Documentation Standards">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#markdown-guidelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Markdown Guidelines
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#content-organization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Content Organization
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#file-naming" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        File Naming
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quality-assurance" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quality Assurance
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Quality Assurance">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#automated-checks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Automated Checks
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#manual-review" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Manual Review
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting-development-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Troubleshooting Development Issues
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Troubleshooting Development Issues">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#mkdocs-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        MkDocs Issues
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pre-commit-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pre-commit Issues
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#git-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Git Issues
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contributing-guidelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Contributing Guidelines
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Contributing Guidelines">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#content-contributions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Content Contributions
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#style-guidelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Style Guidelines
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#review-process" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Review Process
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-help" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Getting Help
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Getting Help">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#documentation-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Documentation Issues
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#technical-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Technical Issues
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1655,7 +1660,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../code-quality/" class="md-nav__link">
+      <a href="../../repository/code-quality/" class="md-nav__link">
         
   
   
@@ -1683,7 +1688,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../technologies/" class="md-nav__link">
+      <a href="../../repository/technologies/" class="md-nav__link">
         
   
   
@@ -1731,198 +1736,204 @@
   
 
 
-<h1 id="development-setup">Development Setup</h1>
-<p>This page documents how to set up the development environment for contributing to this homelab documentation.</p>
-<h2 id="getting-started">Getting Started</h2>
-<h3 id="prerequisites">Prerequisites</h3>
+<h1 id="troubleshooting-k8s-harbor-http-registry-issues">Troubleshooting K8s Harbor HTTP Registry Issues</h1>
+<p>This document contains troubleshooting steps for common issues when configuring Kubernetes clusters to work with
+Harbor HTTP registries.</p>
+<h2 id="registry-configuration-not-applied">Registry Configuration Not Applied</h2>
+<p><strong>Symptoms</strong>: Still getting HTTPS errors after configuration</p>
+<p><strong>Solutions</strong>:</p>
+<ol>
+<li>Verify the file path: <code>/etc/rancher/k3s/registries.yaml</code></li>
+<li>Check YAML syntax (proper indentation)</li>
+<li>Ensure you restarted the correct service name</li>
+<li>Wait a few minutes for configuration to propagate</li>
+</ol>
+<h2 id="service-not-found">Service Not Found</h2>
+<p><strong>Error</strong>: <code>Failed to restart k3s.service: Unit k3s.service not found</code></p>
+<p><strong>Solution</strong>: Check the actual service name:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>systemctl<span class="w"> </span>list-units<span class="w"> </span>--type<span class="o">=</span>service<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>k3s
+</code></pre></div>
+<p>Use the correct service name (<code>k3s.service</code> or <code>k3s-agent.service</code>).</p>
+<h2 id="image-still-not-pulling">Image Still Not Pulling</h2>
+<p><strong>Check these items</strong>:</p>
+<ol>
+<li>Harbor registry is accessible: <code>curl http://192.168.1.206:30002/v2/</code></li>
+<li>Image exists in Harbor</li>
+<li>Kubernetes secret exists: <code>kubectl get secrets -n your-namespace</code></li>
+<li>All nodes have been configured and restarted</li>
+</ol>
+<h2 id="verification-commands">Verification Commands</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Check node configuration</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>cat<span class="w"> </span>/etc/rancher/k3s/registries.yaml
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Check k3s service status</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>systemctl<span class="w"> </span>status<span class="w"> </span>k3s<span class="w">        </span><span class="c1"># or k3s-agent</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>systemctl<span class="w"> </span>status<span class="w"> </span>k3s-agent<span class="w">  </span><span class="c1"># or k3s</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="c1"># Check containerd configuration (should show your registry)</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>crictl<span class="w"> </span>info
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="c1"># Test registry connectivity from node</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>curl<span class="w"> </span>http://192.168.1.206:30002/v2/
+</code></pre></div>
+<h2 id="common-error-messages">Common Error Messages</h2>
+<h3 id="imagepullbackoff">ImagePullBackOff</h3>
+<p><strong>Error</strong>: Pod shows <code>ImagePullBackOff</code> status</p>
+<p><strong>Causes &amp; Solutions</strong>:</p>
 <ul>
-<li><strong>Python 3.8+</strong>: For running MkDocs</li>
-<li><strong>Git</strong>: For version control</li>
-<li><strong>Node.js</strong> (optional): For some pre-commit hooks</li>
+<li><strong>HTTP/HTTPS mismatch</strong>: Configure nodes with registries.yaml (see main guide)</li>
+<li><strong>Missing pull secret</strong>: Create harbor-secret in the target namespace</li>
+<li><strong>Incorrect image path</strong>: Verify project name and image name in Harbor</li>
+<li><strong>Network connectivity</strong>: Test Harbor accessibility from cluster nodes</li>
 </ul>
-<h3 id="initial-setup">Initial Setup</h3>
+<h3 id="errimagepull">ErrImagePull</h3>
+<p><strong>Error</strong>: <code>Failed to pull image: http: server gave HTTP response to HTTPS client</code></p>
+<p><strong>Solution</strong>: This is the classic HTTP registry issue. Follow the main configuration guide to set up
+<code>/etc/rancher/k3s/registries.yaml</code> on all nodes.</p>
+<h3 id="authentication-errors">Authentication Errors</h3>
+<p><strong>Error</strong>: <code>pull access denied</code></p>
+<p><strong>Solutions</strong>:</p>
 <ol>
-<li><strong>Clone the repository</strong>:</li>
+<li>Verify Harbor credentials are correct</li>
+<li>Check if the image/project exists in Harbor</li>
+<li>Ensure the pull secret is created in the correct namespace:</li>
 </ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jcarranz97/homelab.git
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>homelab
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>kubectl<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>docker-registry<span class="w"> </span>harbor-secret<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>--docker-server<span class="o">=</span><span class="m">192</span>.168.1.206:30002<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span>--docker-username<span class="o">=</span>&lt;username&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span>--docker-password<span class="o">=</span>&lt;password&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span>--namespace<span class="o">=</span>&lt;target-namespace&gt;
 </code></pre></div>
-<ol>
-<li><strong>Create a virtual environment</strong>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">source</span><span class="w"> </span>venv/bin/activate<span class="w">  </span><span class="c1"># On Windows: venv\Scripts\activate</span>
+<h2 id="diagnostic-steps">Diagnostic Steps</h2>
+<h3 id="step-1-test-harbor-connectivity">Step 1: Test Harbor Connectivity</h3>
+<p>From each cluster node:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Test basic connectivity</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>curl<span class="w"> </span>http://192.168.1.206:30002/v2/
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Expected response: should return JSON with registry info</span>
 </code></pre></div>
-<ol>
-<li><strong>Install dependencies</strong>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span>mkdocs-material
+<h3 id="step-2-verify-registry-configuration">Step 2: Verify Registry Configuration</h3>
+<p>On each k3s node:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Check if registries.yaml exists and has correct content</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>cat<span class="w"> </span>/etc/rancher/k3s/registries.yaml
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># Check k3s service is running</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>systemctl<span class="w"> </span>status<span class="w"> </span>k3s<span class="w">        </span><span class="c1"># for control plane</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>systemctl<span class="w"> </span>status<span class="w"> </span>k3s-agent<span class="w">  </span><span class="c1"># for worker nodes</span>
 </code></pre></div>
-<ol>
-<li><strong>Install development tools</strong>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pip<span class="w"> </span>install<span class="w"> </span>pre-commit
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>pre-commit<span class="w"> </span>install
+<h3 id="step-3-check-kubernetes-resources">Step 3: Check Kubernetes Resources</h3>
+<p>From your kubectl client:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Check if harbor secret exists</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>secrets<span class="w"> </span>-A<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>harbor
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># Check pod events for detailed error messages</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>kubectl<span class="w"> </span>describe<span class="w"> </span>pod<span class="w"> </span>&lt;failing-pod&gt;<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="c1"># Check deployment status</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>kubectl<span class="w"> </span>get<span class="w"> </span>deployments<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div>
-<h2 id="development-workflow">Development Workflow</h2>
-<h3 id="running-the-documentation-locally">Running the Documentation Locally</h3>
-<p>Start the development server:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mkdocs<span class="w"> </span>serve
+<h3 id="step-4-test-image-pull-manually">Step 4: Test Image Pull Manually</h3>
+<p>On a cluster node:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Test manual image pull using crictl</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>crictl<span class="w"> </span>pull<span class="w"> </span><span class="m">192</span>.168.1.206:30002/library/your-image:latest
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># If this fails, the node configuration is incorrect</span>
 </code></pre></div>
-<p>The documentation will be available at <code>http://localhost:8000</code> with hot reload enabled.
-Any changes to markdown files will automatically refresh the browser.</p>
-<h3 id="making-changes">Making Changes</h3>
-<ol>
-<li><strong>Create a new branch</strong>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature/your-feature-name
+<h2 id="node-specific-issues">Node-Specific Issues</h2>
+<h3 id="control-plane-vs-worker-nodes">Control Plane vs Worker Nodes</h3>
+<p><strong>Issue</strong>: Different service names on different node types</p>
+<p><strong>Solution</strong>: Check actual service name on each node:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>systemctl<span class="w"> </span>list-units<span class="w"> </span>--type<span class="o">=</span>service<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>k3s
 </code></pre></div>
-<ol>
-<li>
-<p><strong>Make your changes</strong>: Edit markdown files in the <code>docs/</code> directory</p>
-</li>
-<li>
-<p><strong>Test locally</strong>: Verify changes look good with <code>mkdocs serve</code></p>
-</li>
-<li>
-<p><strong>Run quality checks</strong>:</p>
-</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files
-</code></pre></div>
-<ol>
-<li><strong>Commit and push</strong>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>git<span class="w"> </span>add<span class="w"> </span>.
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add: description of changes&quot;</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>feature/your-feature-name
-</code></pre></div>
-<h3 id="building-the-documentation">Building the Documentation</h3>
-<p>To build static files for deployment:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mkdocs<span class="w"> </span>build
-</code></pre></div>
-<p>This creates a <code>site/</code> directory with the built documentation.</p>
-<h2 id="file-structure">File Structure</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>homelab/
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>├── docs/                          # Documentation content
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>│   ├── index.md                  # Homepage
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>│   ├── infrastructure/           # Infrastructure documentation
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>│   ├── services/                # Service documentation
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>│   ├── guides/                  # How-to guides
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>│   ├── troubleshooting/         # Problem solving
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>│   ├── reference/               # Quick reference
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>│   └── repository/              # This section
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>├── mkdocs.yml                    # MkDocs configuration
-<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>├── .pre-commit-config.yaml       # Code quality automation
-<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>├── .markdownlint.json           # Markdown linting rules
-<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>├── .gitignore                   # Git ignore patterns
-<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>└── README.md                    # Repository overview
-</code></pre></div>
-<h2 id="documentation-standards">Documentation Standards</h2>
-<h3 id="markdown-guidelines">Markdown Guidelines</h3>
 <ul>
-<li>Use <strong>120 characters</strong> maximum line length</li>
-<li>Use <strong>ATX-style headers</strong> (<code># Header</code> not <code>Header\n======</code>)</li>
-<li>Include <strong>descriptive alt text</strong> for images</li>
-<li>Use <strong>relative links</strong> for internal references</li>
+<li>Control plane usually: <code>k3s.service</code></li>
+<li>Worker nodes usually: <code>k3s-agent.service</code></li>
 </ul>
-<h3 id="content-organization">Content Organization</h3>
-<ul>
-<li><strong>Clear hierarchy</strong>: Use proper heading levels (H1 → H2 → H3)</li>
-<li><strong>Consistent structure</strong>: Follow the established section patterns</li>
-<li><strong>Cross-references</strong>: Link between related sections</li>
-<li><strong>Code examples</strong>: Include practical, working examples</li>
-</ul>
-<h3 id="file-naming">File Naming</h3>
-<ul>
-<li>Use <strong>kebab-case</strong> for file names: <code>getting-started.md</code></li>
-<li>Keep names <strong>descriptive</strong> but <strong>concise</strong></li>
-<li>Use <strong>consistent naming</strong> within each section</li>
-</ul>
-<h2 id="quality-assurance">Quality Assurance</h2>
-<h3 id="automated-checks">Automated Checks</h3>
-<p>Every commit is automatically checked for:</p>
-<ul>
-<li>Markdown formatting consistency</li>
-<li>Spelling mistakes</li>
-<li>Trailing whitespace</li>
-<li>File formatting</li>
-</ul>
-<h3 id="manual-review">Manual Review</h3>
-<p>Before submitting changes:</p>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Content is accurate and up-to-date</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Links work correctly</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Code examples are tested</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Screenshots are current (if applicable)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Writing is clear and concise</li>
-</ul>
-<h2 id="troubleshooting-development-issues">Troubleshooting Development Issues</h2>
-<h3 id="mkdocs-issues">MkDocs Issues</h3>
-<p><strong>Problem</strong>: <code>mkdocs serve</code> fails to start</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Solution: Check Python and dependency versions</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>python<span class="w"> </span>--version
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>pip<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>mkdocs
-</code></pre></div>
-<p><strong>Problem</strong>: Changes not reflecting in browser</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Solution: Hard refresh or restart server</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="c1"># Ctrl+Shift+R (or Cmd+Shift+R on Mac)</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="c1"># Or restart: Ctrl+C then mkdocs serve</span>
-</code></pre></div>
-<h3 id="pre-commit-issues">Pre-commit Issues</h3>
-<p><strong>Problem</strong>: Pre-commit hooks failing</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Solution: Run hooks manually to see details</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files<span class="w"> </span>--verbose
-</code></pre></div>
-<p><strong>Problem</strong>: Hook installation issues</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Solution: Reinstall hooks</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>pre-commit<span class="w"> </span>clean
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>pre-commit<span class="w"> </span>install
-</code></pre></div>
-<h3 id="git-issues">Git Issues</h3>
-<p><strong>Problem</strong>: Large file warnings</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Solution: Check what&#39;s being committed</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>git<span class="w"> </span>status
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>git<span class="w"> </span>ls-files<span class="w"> </span>--others
-</code></pre></div>
-<h2 id="contributing-guidelines">Contributing Guidelines</h2>
-<h3 id="content-contributions">Content Contributions</h3>
-<ul>
-<li><strong>Stay on topic</strong>: Focus on homelab-related content</li>
-<li><strong>Be practical</strong>: Include real examples and working code</li>
-<li><strong>Be accurate</strong>: Test configurations before documenting</li>
-<li><strong>Be helpful</strong>: Write for someone learning the topic</li>
-</ul>
-<h3 id="style-guidelines">Style Guidelines</h3>
-<ul>
-<li><strong>Use active voice</strong> where possible</li>
-<li><strong>Be concise</strong> but thorough</li>
-<li><strong>Use consistent terminology</strong> throughout</li>
-<li><strong>Include context</strong> for commands and configurations</li>
-</ul>
-<h3 id="review-process">Review Process</h3>
+<h3 id="mixed-architecture-clusters">Mixed Architecture Clusters</h3>
+<p><strong>Issue</strong>: Different nodes might have different configurations</p>
+<p><strong>Solution</strong>: Ensure consistent <code>/etc/rancher/k3s/registries.yaml</code> on ALL nodes, regardless of role.</p>
+<h2 id="network-issues">Network Issues</h2>
+<h3 id="harbor-not-accessible">Harbor Not Accessible</h3>
+<p><strong>Symptoms</strong>: <code>connection refused</code> or timeout errors</p>
+<p><strong>Check</strong>:</p>
 <ol>
-<li>Changes are reviewed for technical accuracy</li>
-<li>Writing style and clarity are evaluated</li>
-<li>Links and code examples are tested</li>
-<li>Integration with existing content is verified</li>
+<li>Harbor service is running: <code>kubectl get pods -n harbor-system</code></li>
+<li>Harbor NodePort service: <code>kubectl get svc -n harbor-system</code></li>
+<li>Network connectivity from nodes to Harbor</li>
+<li>Firewall rules allowing traffic on port 30002</li>
 </ol>
+<h3 id="dns-resolution">DNS Resolution</h3>
+<p><strong>Issue</strong>: Using hostname instead of IP address</p>
+<p><strong>Solution</strong>: Either:</p>
+<ul>
+<li>Use IP addresses consistently</li>
+<li>Ensure DNS resolution works from all nodes</li>
+<li>Add entries to <code>/etc/hosts</code> on all nodes</li>
+</ul>
+<h2 id="configuration-validation">Configuration Validation</h2>
+<h3 id="yaml-syntax">YAML Syntax</h3>
+<p>Common YAML syntax errors in registries.yaml:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># CORRECT</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nt">mirrors</span><span class="p">:</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="s">&quot;192.168.1.206:30002&quot;</span><span class="p p-Indicator">:</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;http://192.168.1.206:30002&quot;</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1"># INCORRECT (wrong indentation)</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="nt">mirrors</span><span class="p">:</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="s">&quot;192.168.1.206:30002&quot;</span><span class="p p-Indicator">:</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;http://192.168.1.206:30002&quot;</span>
+</code></pre></div>
+<h3 id="file-permissions">File Permissions</h3>
+<p>Ensure registries.yaml has correct permissions:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Set proper ownership and permissions</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>chown<span class="w"> </span>root:root<span class="w"> </span>/etc/rancher/k3s/registries.yaml
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>chmod<span class="w"> </span><span class="m">644</span><span class="w"> </span>/etc/rancher/k3s/registries.yaml
+</code></pre></div>
+<h2 id="related-issues">Related Issues</h2>
+<h3 id="docker-desktop-configuration">Docker Desktop Configuration</h3>
+<p>If using Docker Desktop with WSL2, also configure Docker Desktop settings:</p>
+<ol>
+<li>Open Docker Desktop settings</li>
+<li>Go to "Docker Engine"</li>
+<li>Add insecure registry to JSON configuration</li>
+</ol>
+<h3 id="multiple-registry-support">Multiple Registry Support</h3>
+<p>To support multiple HTTP registries:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nt">mirrors</span><span class="p">:</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="s">&quot;192.168.1.206:30002&quot;</span><span class="p p-Indicator">:</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;http://192.168.1.206:30002&quot;</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">  </span><span class="s">&quot;registry2.local:5000&quot;</span><span class="p p-Indicator">:</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;http://registry2.local:5000&quot;</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="nt">configs</span><span class="p">:</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">  </span><span class="s">&quot;192.168.1.206:30002&quot;</span><span class="p p-Indicator">:</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">    </span><span class="nt">tls</span><span class="p">:</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">      </span><span class="nt">insecure_skip_verify</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">  </span><span class="s">&quot;registry2.local:5000&quot;</span><span class="p p-Indicator">:</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">    </span><span class="nt">tls</span><span class="p">:</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">      </span><span class="nt">insecure_skip_verify</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
 <h2 id="getting-help">Getting Help</h2>
-<h3 id="documentation-issues">Documentation Issues</h3>
-<ul>
-<li>Check existing <a href="../../troubleshooting/common-issues/">troubleshooting guides</a></li>
-<li>Review <a href="https://www.mkdocs.org/">MkDocs documentation</a></li>
-<li>Look at <a href="https://squidfunk.github.io/mkdocs-material/">Material theme docs</a></li>
+<p>If issues persist:</p>
+<ol>
+<li>Check k3s logs: <code>journalctl -u k3s -f</code> (or <code>k3s-agent</code>)</li>
+<li>Check containerd logs: <code>journalctl -u containerd -f</code></li>
+<li>Verify Harbor logs in Kubernetes: <code>kubectl logs -n harbor-system &lt;harbor-pod&gt;</code></li>
+<li>Test with a simple public image first to isolate registry issues</li>
+</ol>
+<h2 id="quick-resolution-checklist">Quick Resolution Checklist</h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>/etc/rancher/k3s/registries.yaml</code> exists on ALL nodes</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> YAML syntax is correct (proper indentation)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Correct k3s service restarted on each node</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Harbor is accessible via HTTP from all nodes</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Pull secret exists in the target namespace</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Image path is correct in deployment YAML</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> All nodes show "Ready" status in <code>kubectl get nodes</code></li>
 </ul>
-<h3 id="technical-issues">Technical Issues</h3>
-<ul>
-<li>Check <a href="https://github.com/jcarranz97/homelab/issues">repository issues</a></li>
-<li>Review <a href="../code-quality/">development tools documentation</a></li>
-<li>Consult the <a href="../technologies/">technologies overview</a></li>
-</ul>
-<hr />
-<p><em>This documentation setup follows modern technical writing best practices and ensures consistent,
-high-quality documentation for the homelab project.</em></p>
 
 
 

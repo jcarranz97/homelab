@@ -11,10 +11,10 @@
       
       
       
-        <link rel="prev" href="../../services/monitoring/">
+        <link rel="prev" href="../k8s-cluster-setup/">
       
       
-        <link rel="next" href="../getting-started/">
+        <link rel="next" href="../k8s-harbor-http-registry/">
       
       
         
@@ -289,7 +289,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+        <a href="../k8s-cluster-setup/" class="md-tabs__link">
           
   
   
@@ -814,6 +814,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../k8s-cluster-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Cluster Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1197,6 +1225,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../k8s-harbor-http-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Harbor HTTP Registry Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../getting-started/" class="md-nav__link">
         
   
@@ -1294,6 +1350,34 @@
     
   
     Common Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/k8s-harbor-http-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Harbor HTTP Registry
   
 
     
@@ -1657,14 +1741,14 @@ and deploying the FastAPI application to a Kubernetes cluster.</p>
 <h3 id="21-build-the-docker-image">2.1 Build the Docker Image</h3>
 <p>Build the image with proper Harbor registry tagging:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Replace &#39;your-project&#39; with your actual Harbor project name</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span><span class="m">192</span>.168.1.206:30002/your-project/fast-api-docker:latest<span class="w"> </span>.
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span><span class="m">192</span>.168.1.206:30002/library/fast-api-docker:latest<span class="w"> </span>.
 </code></pre></div>
 <h3 id="22-tag-image-if-needed">2.2 Tag Image (if needed)</h3>
 <p>If you built with a different tag initially, retag it:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>tag<span class="w"> </span>fast-api-docker:latest<span class="w"> </span><span class="m">192</span>.168.1.206:30002/your-project/fast-api-docker:latest
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>tag<span class="w"> </span>fast-api-docker:latest<span class="w"> </span><span class="m">192</span>.168.1.206:30002/library/fast-api-docker:latest
 </code></pre></div>
 <h3 id="23-push-to-harbor-registry">2.3 Push to Harbor Registry</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>push<span class="w"> </span><span class="m">192</span>.168.1.206:30002/your-project/fast-api-docker:latest
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>push<span class="w"> </span><span class="m">192</span>.168.1.206:30002/library/fast-api-docker:latest
 </code></pre></div>
 <h3 id="24-verify-image-in-harbor">2.4 Verify Image in Harbor</h3>
 <ol>
@@ -1674,6 +1758,11 @@ and deploying the FastAPI application to a Kubernetes cluster.</p>
 <li>Check that the <code>latest</code> tag is available</li>
 </ol>
 <h2 id="3-kubernetes-deployment">3. Kubernetes Deployment</h2>
+<blockquote>
+<p><strong>⚠️ Important</strong>: Before deploying to Kubernetes, ensure your cluster is configured to work with
+Harbor's HTTP registry. If you encounter <code>ImagePullBackOff</code> or HTTPS client errors, follow the
+<a href="../k8s-harbor-http-registry/">K8s Harbor HTTP Registry Setup Guide</a> to configure all cluster nodes properly.</p>
+</blockquote>
 <h3 id="31-create-harbor-secret-for-kubernetes">3.1 Create Harbor Secret for Kubernetes</h3>
 <p>Create a secret to allow Kubernetes to pull images from Harbor:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>kubectl<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>docker-registry<span class="w"> </span>harbor-secret<span class="w"> </span><span class="se">\</span>
@@ -1707,7 +1796,7 @@ should be modified to use Harbor instead of ghcr.io:</p>
 <a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">harbor-secret</span><span class="w">  </span><span class="c1"># Updated secret name</span>
 <a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fast-api-docker</span>
-<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.1.206:30002/your-project/fast-api-docker:latest</span><span class="w">  </span><span class="c1"># Updated image</span>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.1.206:30002/library/fast-api-docker:latest</span><span class="w">  </span><span class="c1"># Updated image</span>
 <a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="w">        </span><span class="nt">ports</span><span class="p">:</span>
 <a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 <a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a><span class="w">        </span><span class="nt">resources</span><span class="p">:</span>
@@ -1784,8 +1873,11 @@ should be modified to use Harbor instead of ghcr.io:</p>
 </code></pre></div>
 <h2 id="5-troubleshooting">5. Troubleshooting</h2>
 <h3 id="51-common-issues">5.1 Common Issues</h3>
+<p><strong>For detailed troubleshooting of Harbor HTTP registry issues</strong>, see the <a href="../../troubleshooting/k8s-harbor-http-registry/">K8s Harbor HTTP Registry Troubleshooting Guide</a>.</p>
 <p><strong>Image Pull Errors:</strong></p>
 <ul>
+<li><strong>HTTP/HTTPS client errors</strong>: Follow the
+  <a href="../k8s-harbor-http-registry/">K8s Harbor HTTP Registry Setup Guide</a> to configure cluster nodes</li>
 <li>Verify Harbor credentials are correct</li>
 <li>Check if the secret <code>harbor-secret</code> exists in the correct namespace</li>
 <li>Ensure the image path is correct in the deployment YAML</li>

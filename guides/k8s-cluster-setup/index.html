@@ -11,10 +11,10 @@
       
       
       
-        <link rel="prev" href="../k8s-harbor-http-registry/">
+        <link rel="prev" href="../../services/monitoring/">
       
       
-        <link rel="next" href="../../troubleshooting/common-issues/">
+        <link rel="next" href="../harbor-k8s-deployment/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Getting Started - Homelab</title>
+        <title>K8s Cluster Setup - Homelab</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getting-started" class="md-skip">
+        <a href="#setting-up-a-kubernetes-cluster-in-homelab" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Getting Started
+              K8s Cluster Setup
             
           </span>
         </div>
@@ -289,7 +289,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../k8s-cluster-setup/" class="md-tabs__link">
+        <a href="./" class="md-tabs__link">
           
   
   
@@ -814,10 +814,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../k8s-cluster-setup/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Cluster Setup
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -833,6 +860,359 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-node-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Node Preparation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Node Preparation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-install-ubuntu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Install Ubuntu
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-install-and-configure-k3s" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Install and Configure k3s
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Install and Configure k3s">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-install-k3s-on-control-plane-master" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Install k3s on Control Plane (Master)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-join-worker-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Join Worker Nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-configure-kubectl-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Configure kubectl Access
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-verify-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Verify Cluster
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-container-registry-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Container Registry Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Container Registry Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-why-harbor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Why Harbor?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-harbor-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Harbor Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-important-http-registry-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Important: HTTP Registry Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-verification-and-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Verification and Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Verification and Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-test-basic-functionality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Test Basic Functionality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-test-harbor-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Test Harbor Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cluster-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cluster Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-post-setup-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Post-Setup Tasks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Post-Setup Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-install-additional-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Install Additional Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-configure-ingress-to-be-added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Configure Ingress (To be added)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-monitoring-setup-to-be-added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Monitoring Setup (To be added)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#node-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Node Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#application-deployment-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Application Deployment Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-guides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Guides
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -898,37 +1278,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Getting Started
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
         
   
   
@@ -944,164 +1297,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#what-is-a-homelab" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What is a Homelab?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#my-homelab-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        My Homelab Setup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#documentation-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Documentation Structure
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Documentation Structure">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#infrastructure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📋 Infrastructure
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#services" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ⚙️ Services
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#guides-how-tos" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📚 Guides &amp; How-tos
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🔧 Troubleshooting
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📖 Reference
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-to-use-this-documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How to Use This Documentation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prerequisites
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contributing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Contributing
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next Steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1541,91 +1736,217 @@
   
 
 
-<h1 id="getting-started">Getting Started</h1>
-<p>Welcome to my homelab! This guide will help you understand how to navigate and use this documentation.</p>
-<h2 id="what-is-a-homelab">What is a Homelab?</h2>
-<p>A homelab is a personal testing environment where you can:</p>
+<h1 id="setting-up-a-kubernetes-cluster-in-homelab">Setting Up a Kubernetes Cluster in Homelab</h1>
+<p>This guide provides a high-level overview of setting up a Kubernetes cluster in a homelab environment using k3s.
+This covers the essential steps from node preparation to having a fully functional cluster with container registry
+capabilities.</p>
+<h2 id="overview">Overview</h2>
+<p>Our homelab k8s cluster setup consists of:</p>
 <ul>
-<li>Learn new technologies safely</li>
-<li>Test configurations before production</li>
-<li>Self-host applications and services</li>
-<li>Practice system administration skills</li>
+<li><strong>Multiple Ubuntu nodes</strong> (control plane + workers)</li>
+<li><strong>k3s Kubernetes distribution</strong> (lightweight and homelab-friendly)</li>
+<li><strong>Harbor container registry</strong> (for storing and managing Docker images)</li>
+<li><strong>Basic networking</strong> configuration</li>
 </ul>
-<h2 id="my-homelab-setup">My Homelab Setup</h2>
-<p>My homelab is centered around a Kubernetes cluster that runs various services and applications. The main components include:</p>
+<h2 id="prerequisites">Prerequisites</h2>
 <ul>
-<li><strong>Kubernetes Cluster</strong>: Container orchestration platform</li>
-<li><strong>Harbor Registry</strong>: Private container image registry</li>
-<li><strong>Persistent Storage</strong>: For stateful applications</li>
-<li><strong>Networking</strong>: Service mesh and ingress controllers</li>
+<li>Multiple physical or virtual machines for cluster nodes</li>
+<li>Basic networking setup (nodes can communicate with each other)</li>
+<li>SSH access to all nodes</li>
+<li>Internet connectivity for downloading packages</li>
 </ul>
-<h2 id="documentation-structure">Documentation Structure</h2>
-<p>This documentation is organized into several sections:</p>
-<h3 id="infrastructure">📋 Infrastructure</h3>
-<p>Describes the physical and logical infrastructure:</p>
-<ul>
-<li>Hardware specifications</li>
-<li>Network topology</li>
-<li>Kubernetes cluster configuration</li>
-</ul>
-<h3 id="services">⚙️ Services</h3>
-<p>Documents all running services:</p>
-<ul>
-<li>Service descriptions and access information</li>
-<li>Configuration details</li>
-<li>Integration points</li>
-</ul>
-<h3 id="guides-how-tos">📚 Guides &amp; How-tos</h3>
-<p>Step-by-step tutorials for:</p>
-<ul>
-<li>Deploying applications</li>
-<li>Configuring services</li>
-<li>Troubleshooting common issues</li>
-</ul>
-<h3 id="troubleshooting">🔧 Troubleshooting</h3>
-<p>Common problems and their solutions</p>
-<h3 id="reference">📖 Reference</h3>
-<p>Quick reference materials:</p>
-<ul>
-<li>Configuration files</li>
-<li>Useful commands</li>
-<li>External resources</li>
-</ul>
-<h2 id="how-to-use-this-documentation">How to Use This Documentation</h2>
+<h2 id="step-1-node-preparation">Step 1: Node Preparation</h2>
+<h3 id="11-install-ubuntu">1.1 Install Ubuntu</h3>
+<p>On each node that will be part of your cluster:</p>
 <ol>
+<li><strong>Install Ubuntu Server</strong> (20.04 LTS or newer recommended)</li>
+<li>Use a clean, minimal installation</li>
+<li>Configure static IP addresses for consistency</li>
 <li>
-<p><strong>New to homelabs?</strong> Start with the <a href="../../infrastructure/overview/">Infrastructure Overview</a> to understand the setup</p>
+<p>Set up SSH access for remote management</p>
 </li>
 <li>
-<p><strong>Setting up your own homelab?</strong> Follow the <a href="../k8s-cluster-setup/">K8s Cluster Setup Guide</a> for step-by-step instructions</p>
-</li>
-<li>
-<p><strong>Want to deploy something?</strong> Check the <a href="../harbor-k8s-deployment/">Guides &amp; How-tos</a> section for detailed tutorials</p>
-</li>
-<li>
-<p><strong>Looking for a specific service?</strong> Visit the <a href="../../services/overview/">Services</a> section</p>
-</li>
-<li>
-<p><strong>Having issues?</strong> Check <a href="../../troubleshooting/common-issues/">Troubleshooting</a> for solutions</p>
+<p><strong>Basic Node Configuration</strong>:</p>
 </li>
 </ol>
-<h2 id="prerequisites">Prerequisites</h2>
-<p>To follow along with the guides in this documentation, you should have:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Update system packages</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>upgrade<span class="w"> </span>-y
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Install basic utilities</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>curl<span class="w"> </span>wget<span class="w"> </span>htop<span class="w"> </span>-y
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># Configure hostnames (optional but recommended)</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>sudo<span class="w"> </span>hostnamectl<span class="w"> </span>set-hostname<span class="w"> </span>&lt;node-name&gt;
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># Example: dell-01, nuc-01, etc.</span>
+</code></pre></div>
+<ol>
+<li><strong>Verify Node Connectivity</strong>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Test connectivity between nodes</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ping<span class="w"> </span>&lt;other-node-ip&gt;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Verify SSH access works from your management machine</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>ssh<span class="w"> </span>user@&lt;node-ip&gt;
+</code></pre></div>
+<h2 id="step-2-install-and-configure-k3s">Step 2: Install and Configure k3s</h2>
+<h3 id="21-install-k3s-on-control-plane-master">2.1 Install k3s on Control Plane (Master)</h3>
+<p>On your designated master node:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Install k3s server (control plane)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>-sfL<span class="w"> </span>https://get.k3s.io<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh<span class="w"> </span>-
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Get the node token for workers</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>sudo<span class="w"> </span>cat<span class="w"> </span>/var/lib/rancher/k3s/server/node-token
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Verify installation</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>sudo<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+</code></pre></div>
+<h3 id="22-join-worker-nodes">2.2 Join Worker Nodes</h3>
+<p>On each worker node:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Install k3s agent (replace with your master node IP and token)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>curl<span class="w"> </span>-sfL<span class="w"> </span>https://get.k3s.io<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nv">K3S_URL</span><span class="o">=</span>https://&lt;MASTER_IP&gt;:6443<span class="w"> </span><span class="nv">K3S_TOKEN</span><span class="o">=</span>&lt;NODE_TOKEN&gt;<span class="w"> </span>sh<span class="w"> </span>-
+</code></pre></div>
+<h3 id="23-configure-kubectl-access">2.3 Configure kubectl Access</h3>
+<p>On your local machine or management node:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Copy kubeconfig from master node</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>scp<span class="w"> </span>user@&lt;master-ip&gt;:/etc/rancher/k3s/k3s.yaml<span class="w"> </span>~/.kube/config
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># Update server IP in config</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s/127.0.0.1/&lt;master-ip&gt;/g&#39;</span><span class="w"> </span>~/.kube/config
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1"># Verify cluster access</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+</code></pre></div>
+<h3 id="24-verify-cluster">2.4 Verify Cluster</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Check all nodes are ready</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>-o<span class="w"> </span>wide
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># Check system pods</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>kube-system
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="c1"># Verify cluster info</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>kubectl<span class="w"> </span>cluster-info
+</code></pre></div>
+<p>Expected output should show all nodes in "Ready" status.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is a basic k3s setup. For detailed configuration options, security hardening, and advanced networking,
+a separate detailed guide will be created.</p>
+</div>
+<h2 id="step-3-container-registry-setup">Step 3: Container Registry Setup</h2>
+<h3 id="31-why-harbor">3.1 Why Harbor?</h3>
+<p>With your k8s cluster running, you need a place to store your custom Docker images. Harbor provides:</p>
 <ul>
-<li>Basic understanding of containers and Docker</li>
-<li>Familiarity with Kubernetes concepts</li>
-<li>Access to a Kubernetes cluster (or willingness to set one up)</li>
-<li>Command line experience with <code>kubectl</code></li>
+<li><strong>Private container registry</strong> for your homelab images</li>
+<li><strong>Web-based management</strong> interface</li>
+<li><strong>Security scanning</strong> and access controls</li>
+<li><strong>Integration with Kubernetes</strong></li>
 </ul>
-<h2 id="contributing">Contributing</h2>
-<p>This is my personal documentation, but if you find errors or have suggestions, feel free to reach out!</p>
-<h2 id="next-steps">Next Steps</h2>
-<p>Ready to dive in? Here are some suggested paths:</p>
+<h3 id="32-harbor-deployment">3.2 Harbor Deployment</h3>
+<p>For complete Harbor installation and configuration instructions, follow the <strong><a href="../harbor-k8s-deployment/">Harbor &amp; K8s Deployment Guide</a></strong>.</p>
+<p>This guide covers:</p>
 <ul>
-<li><strong>Setting Up Your Own</strong>: <a href="../k8s-cluster-setup/">K8s Cluster Setup Guide</a></li>
-<li><strong>Infrastructure Tour</strong>: <a href="../../infrastructure/overview/">Infrastructure Overview</a></li>
-<li><strong>First Deployment</strong>: <a href="../harbor-k8s-deployment/">Harbor &amp; K8s Deployment Guide</a></li>
-<li><strong>Service Catalog</strong>: <a href="../../services/overview/">Services Overview</a></li>
+<li>Harbor installation on your k8s cluster</li>
+<li>Configuring Docker and Kubernetes to work with Harbor</li>
+<li>Building and pushing images to Harbor</li>
+<li>Deploying applications from Harbor registry</li>
+</ul>
+<h3 id="33-important-http-registry-configuration">3.3 Important: HTTP Registry Configuration</h3>
+<p>⚠️ <strong>Critical Step</strong>: After setting up Harbor, you must configure all k8s nodes to work with Harbor's HTTP
+registry. Follow the <a href="../k8s-harbor-http-registry/">K8s Harbor HTTP Registry Setup Guide</a> to avoid
+<code>ImagePullBackOff</code> errors.</p>
+<h2 id="step-4-verification-and-testing">Step 4: Verification and Testing</h2>
+<h3 id="41-test-basic-functionality">4.1 Test Basic Functionality</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Create a test namespace</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>test-namespace
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Deploy a simple application</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>kubectl<span class="w"> </span>create<span class="w"> </span>deployment<span class="w"> </span>nginx-test<span class="w"> </span>--image<span class="o">=</span>nginx<span class="w"> </span>-n<span class="w"> </span>test-namespace
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Verify deployment</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>test-namespace
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1"># Clean up</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>namespace<span class="w"> </span>test-namespace
+</code></pre></div>
+<h3 id="42-test-harbor-integration">4.2 Test Harbor Integration</h3>
+<p>Once Harbor is configured:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Test pulling from Harbor registry</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>kubectl<span class="w"> </span>create<span class="w"> </span>deployment<span class="w"> </span>test-harbor<span class="w"> </span>--image<span class="o">=</span><span class="m">192</span>.168.1.206:30002/library/your-app:latest<span class="w"> </span>-n<span class="w"> </span>test-namespace
+</code></pre></div>
+<h2 id="cluster-architecture">Cluster Architecture</h2>
+<p>Your completed cluster should look like this:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>│   Control Plane │    │   Worker Node   │    │   Worker Node   │
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>│    (dell-01)    │    │    (nuc-01)     │    │    (node-03)    │
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>│  192.168.1.208  │    │  192.168.1.206  │    │  192.168.1.xxx  │
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>└─────────────────┘    └─────────────────┘    └─────────────────┘
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>         │                       │                       │
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>         └───────────────────────┼───────────────────────┘
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>                                 │
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>                    ┌─────────────────┐
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>                    │  Harbor Registry │
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>                    │ 192.168.1.206:30002 │
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>                    └─────────────────┘
+</code></pre></div>
+<h2 id="common-post-setup-tasks">Common Post-Setup Tasks</h2>
+<h3 id="41-install-additional-tools">4.1 Install Additional Tools</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Install Helm (package manager for Kubernetes)</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>curl<span class="w"> </span>https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Install kubectl bash completion</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>kubectl<span class="w"> </span>completion<span class="w"> </span>bash<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/bash_completion.d/kubectl
+</code></pre></div>
+<h3 id="42-configure-ingress-to-be-added">4.2 Configure Ingress (To be added)</h3>
+<p>For production-like deployments, consider setting up an ingress controller:</p>
+<ul>
+<li>Traefik (comes with k3s by default)</li>
+<li>Nginx Ingress Controller</li>
+<li>Cloudflare Tunnel integration</li>
+</ul>
+<h3 id="43-monitoring-setup-to-be-added">4.3 Monitoring Setup (To be added)</h3>
+<p>Consider adding monitoring to your cluster:</p>
+<ul>
+<li>Prometheus for metrics collection</li>
+<li>Grafana for visualization</li>
+<li>Kubernetes Dashboard for web UI</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="node-issues">Node Issues</h3>
+<ul>
+<li><strong>Nodes not joining</strong>: Check firewall settings and node token</li>
+<li><strong>Network connectivity</strong>: Verify nodes can reach each other on required ports</li>
+<li><strong>Service status</strong>: Check k3s service status with <code>systemctl status k3s</code></li>
+</ul>
+<h3 id="application-deployment-issues">Application Deployment Issues</h3>
+<ul>
+<li><strong>ImagePullBackOff</strong>: Usually related to Harbor HTTP registry configuration</li>
+<li><strong>Scheduling issues</strong>: Check node resources and taints</li>
+<li><strong>Networking problems</strong>: Verify service and ingress configurations</li>
+</ul>
+<p>For detailed troubleshooting of Harbor-related issues, see the <a href="../../troubleshooting/k8s-harbor-http-registry/">K8s Harbor HTTP Registry Troubleshooting Guide</a>.</p>
+<h2 id="next-steps">Next Steps</h2>
+<ol>
+<li><strong>Detailed k3s Configuration</strong>: Create advanced configuration guide</li>
+<li><strong>Security Hardening</strong>: Implement security best practices</li>
+<li><strong>Backup Strategy</strong>: Set up cluster and data backup procedures</li>
+<li><strong>CI/CD Integration</strong>: Connect with GitLab/GitHub Actions</li>
+<li><strong>Monitoring Setup</strong>: Deploy Prometheus and Grafana</li>
+<li><strong>Ingress Configuration</strong>: Set up proper ingress for external access</li>
+</ol>
+<h2 id="summary">Summary</h2>
+<p>This guide covered the essential steps to set up a functional k8s homelab cluster:</p>
+<ol>
+<li>✅ <strong>Node Preparation</strong>: Ubuntu installation and basic configuration</li>
+<li>✅ <strong>k3s Installation</strong>: Control plane and worker node setup</li>
+<li>✅ <strong>Harbor Registry</strong>: Container image storage and management</li>
+<li>✅ <strong>Verification</strong>: Testing cluster functionality</li>
+</ol>
+<p>Your cluster is now ready for deploying applications and experimenting with Kubernetes features!</p>
+<h2 id="related-guides">Related Guides</h2>
+<ul>
+<li><a href="../harbor-k8s-deployment/">Harbor &amp; K8s Deployment Guide</a> - Complete Harbor setup</li>
+<li><a href="../k8s-harbor-http-registry/">K8s Harbor HTTP Registry Setup</a> - HTTP registry configuration</li>
+<li><a href="../../services/harbor/">Harbor Service Documentation</a> - Harbor service overview</li>
 </ul>
 
 

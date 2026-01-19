@@ -11,10 +11,10 @@
       
       
       
-        <link rel="prev" href="../k8s-harbor-http-registry/">
+        <link rel="prev" href="../harbor-k8s-deployment/">
       
       
-        <link rel="next" href="../../troubleshooting/common-issues/">
+        <link rel="next" href="../getting-started/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Getting Started - Homelab</title>
+        <title>K8s Harbor HTTP Registry Setup - Homelab</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getting-started" class="md-skip">
+        <a href="#how-to-configure-k8s-cluster-nodes-for-harbor-http-registry" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Getting Started
+              K8s Harbor HTTP Registry Setup
             
           </span>
         </div>
@@ -870,34 +870,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../k8s-harbor-http-registry/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    K8s Harbor HTTP Registry Setup
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -917,7 +889,7 @@
   <span class="md-ellipsis">
     
   
-    Getting Started
+    K8s Harbor HTTP Registry Setup
   
 
     
@@ -935,7 +907,7 @@
   <span class="md-ellipsis">
     
   
-    Getting Started
+    K8s Harbor HTTP Registry Setup
   
 
     
@@ -961,104 +933,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-a-homelab" class="md-nav__link">
+  <a href="#problem-overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What is a Homelab?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#my-homelab-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        My Homelab Setup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#documentation-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Documentation Structure
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Documentation Structure">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#infrastructure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📋 Infrastructure
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#services" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ⚙️ Services
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#guides-how-tos" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📚 Guides &amp; How-tos
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🔧 Troubleshooting
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📖 Reference
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-to-use-this-documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How to Use This Documentation
+        Problem Overview
       
     </span>
   </a>
@@ -1077,10 +955,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#contributing" class="md-nav__link">
+  <a href="#solution-overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Contributing
+        Solution Overview
       
     </span>
   </a>
@@ -1088,10 +966,277 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#step-by-step-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next Steps
+        Step-by-Step Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step-by-Step Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-identify-your-cluster-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Identify Your Cluster Nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-configure-each-node" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Configure Each Node
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Configure Each Node">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ssh-into-each-node" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SSH into each node
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-the-registries-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create the registries configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-the-following-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add the following content
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#save-the-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Save the file
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-restart-k3s-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Restart k3s Services
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Restart k3s Services">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#on-control-plane-master-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On Control Plane (Master) Nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-worker-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On Worker Nodes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-verify-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Verify Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-file-explanation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration File Explanation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-node-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Node Configurations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Node Configurations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-node-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single Node Cluster
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-node-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Node Cluster
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-homelab-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Homelab Use
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Production
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternative-https-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternative: HTTPS Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
       
     </span>
   </a>
@@ -1102,6 +1247,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1541,92 +1714,169 @@
   
 
 
-<h1 id="getting-started">Getting Started</h1>
-<p>Welcome to my homelab! This guide will help you understand how to navigate and use this documentation.</p>
-<h2 id="what-is-a-homelab">What is a Homelab?</h2>
-<p>A homelab is a personal testing environment where you can:</p>
-<ul>
-<li>Learn new technologies safely</li>
-<li>Test configurations before production</li>
-<li>Self-host applications and services</li>
-<li>Practice system administration skills</li>
-</ul>
-<h2 id="my-homelab-setup">My Homelab Setup</h2>
-<p>My homelab is centered around a Kubernetes cluster that runs various services and applications. The main components include:</p>
-<ul>
-<li><strong>Kubernetes Cluster</strong>: Container orchestration platform</li>
-<li><strong>Harbor Registry</strong>: Private container image registry</li>
-<li><strong>Persistent Storage</strong>: For stateful applications</li>
-<li><strong>Networking</strong>: Service mesh and ingress controllers</li>
-</ul>
-<h2 id="documentation-structure">Documentation Structure</h2>
-<p>This documentation is organized into several sections:</p>
-<h3 id="infrastructure">📋 Infrastructure</h3>
-<p>Describes the physical and logical infrastructure:</p>
-<ul>
-<li>Hardware specifications</li>
-<li>Network topology</li>
-<li>Kubernetes cluster configuration</li>
-</ul>
-<h3 id="services">⚙️ Services</h3>
-<p>Documents all running services:</p>
-<ul>
-<li>Service descriptions and access information</li>
-<li>Configuration details</li>
-<li>Integration points</li>
-</ul>
-<h3 id="guides-how-tos">📚 Guides &amp; How-tos</h3>
-<p>Step-by-step tutorials for:</p>
-<ul>
-<li>Deploying applications</li>
-<li>Configuring services</li>
-<li>Troubleshooting common issues</li>
-</ul>
-<h3 id="troubleshooting">🔧 Troubleshooting</h3>
-<p>Common problems and their solutions</p>
-<h3 id="reference">📖 Reference</h3>
-<p>Quick reference materials:</p>
-<ul>
-<li>Configuration files</li>
-<li>Useful commands</li>
-<li>External resources</li>
-</ul>
-<h2 id="how-to-use-this-documentation">How to Use This Documentation</h2>
-<ol>
-<li>
-<p><strong>New to homelabs?</strong> Start with the <a href="../../infrastructure/overview/">Infrastructure Overview</a> to understand the setup</p>
-</li>
-<li>
-<p><strong>Setting up your own homelab?</strong> Follow the <a href="../k8s-cluster-setup/">K8s Cluster Setup Guide</a> for step-by-step instructions</p>
-</li>
-<li>
-<p><strong>Want to deploy something?</strong> Check the <a href="../harbor-k8s-deployment/">Guides &amp; How-tos</a> section for detailed tutorials</p>
-</li>
-<li>
-<p><strong>Looking for a specific service?</strong> Visit the <a href="../../services/overview/">Services</a> section</p>
-</li>
-<li>
-<p><strong>Having issues?</strong> Check <a href="../../troubleshooting/common-issues/">Troubleshooting</a> for solutions</p>
-</li>
-</ol>
+<h1 id="how-to-configure-k8s-cluster-nodes-for-harbor-http-registry">How to Configure K8s Cluster Nodes for Harbor HTTP Registry</h1>
+<p>This guide explains how to configure all Kubernetes cluster nodes to pull images from a local Harbor registry
+running on HTTP (non-HTTPS).</p>
+<h2 id="problem-overview">Problem Overview</h2>
+<p>By default, both Docker and Kubernetes expect container registries to use HTTPS. When using a local Harbor
+registry with HTTP (common in homelab environments), you'll encounter errors like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>http: server gave HTTP response to HTTPS client
+</code></pre></div>
+<p>This guide provides the solution to configure your k3s cluster to work with HTTP registries.</p>
 <h2 id="prerequisites">Prerequisites</h2>
-<p>To follow along with the guides in this documentation, you should have:</p>
 <ul>
-<li>Basic understanding of containers and Docker</li>
-<li>Familiarity with Kubernetes concepts</li>
-<li>Access to a Kubernetes cluster (or willingness to set one up)</li>
-<li>Command line experience with <code>kubectl</code></li>
+<li>k3s cluster with control plane and worker nodes</li>
+<li>Harbor registry running on HTTP (e.g., <code>192.168.1.206:30002</code>)</li>
+<li>SSH access to all cluster nodes</li>
+<li>Root/sudo access on cluster nodes</li>
 </ul>
-<h2 id="contributing">Contributing</h2>
-<p>This is my personal documentation, but if you find errors or have suggestions, feel free to reach out!</p>
-<h2 id="next-steps">Next Steps</h2>
-<p>Ready to dive in? Here are some suggested paths:</p>
+<h2 id="solution-overview">Solution Overview</h2>
+<p>You need to configure <strong>every node</strong> in your k3s cluster (both control plane and worker nodes) to allow HTTP
+connections to your Harbor registry.</p>
+<h2 id="step-by-step-configuration">Step-by-Step Configuration</h2>
+<h3 id="step-1-identify-your-cluster-nodes">Step 1: Identify Your Cluster Nodes</h3>
+<p>First, identify all nodes in your cluster:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>-o<span class="w"> </span>wide
+</code></pre></div>
+<p>Example output:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>NAME      STATUS   ROLES                       AGE   VERSION        INTERNAL-IP     EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>dell-01   Ready    control-plane,master        10d   v1.33.4+k3s1   192.168.1.208   &lt;none&gt;        Ubuntu 20.04.3 LTS   5.4.0-91-generic    containerd://1.7.21-k3s2
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>nuc-01    Ready    &lt;none&gt;                      10d   v1.33.4+k3s1   192.168.1.206   &lt;none&gt;        Ubuntu 20.04.3 LTS   5.4.0-91-generic    containerd://1.7.21-k3s2
+</code></pre></div>
+<h3 id="step-2-configure-each-node">Step 2: Configure Each Node</h3>
+<p><strong>You must repeat this process on EVERY node in your cluster.</strong></p>
+<h4 id="ssh-into-each-node">SSH into each node</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># For control plane node</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>ssh<span class="w"> </span>root@192.168.1.208<span class="w">  </span><span class="c1"># dell-01</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># For worker nodes</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>ssh<span class="w"> </span>root@192.168.1.206<span class="w">  </span><span class="c1"># nuc-01</span>
+</code></pre></div>
+<h4 id="create-the-registries-configuration">Create the registries configuration</h4>
+<p>On <strong>each node</strong>, create the registries configuration file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Create the directory if it doesn&#39;t exist</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/rancher/k3s
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># Create/edit the registries.yaml file</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>nano<span class="w"> </span>/etc/rancher/k3s/registries.yaml
+</code></pre></div>
+<h4 id="add-the-following-content">Add the following content</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">mirrors</span><span class="p">:</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="s">&quot;192.168.1.206:30002&quot;</span><span class="p p-Indicator">:</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;http://192.168.1.206:30002&quot;</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="nt">configs</span><span class="p">:</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span><span class="s">&quot;192.168.1.206:30002&quot;</span><span class="p p-Indicator">:</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="nt">tls</span><span class="p">:</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">      </span><span class="nt">insecure_skip_verify</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p><strong>Important</strong>: Replace <code>192.168.1.206:30002</code> with your Harbor registry's actual IP and port.</p>
+<h4 id="save-the-file">Save the file</h4>
 <ul>
-<li><strong>Setting Up Your Own</strong>: <a href="../k8s-cluster-setup/">K8s Cluster Setup Guide</a></li>
-<li><strong>Infrastructure Tour</strong>: <a href="../../infrastructure/overview/">Infrastructure Overview</a></li>
-<li><strong>First Deployment</strong>: <a href="../harbor-k8s-deployment/">Harbor &amp; K8s Deployment Guide</a></li>
-<li><strong>Service Catalog</strong>: <a href="../../services/overview/">Services Overview</a></li>
+<li>In nano: Press <code>Ctrl+X</code>, then <code>Y</code>, then <code>Enter</code></li>
+<li>In vim: Press <code>Esc</code>, type <code>:wq</code>, press <code>Enter</code></li>
 </ul>
+<h3 id="step-3-restart-k3s-services">Step 3: Restart k3s Services</h3>
+<p>The service name differs between control plane and worker nodes:</p>
+<h4 id="on-control-plane-master-nodes">On Control Plane (Master) Nodes</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Check if it&#39;s the control plane service</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>systemctl<span class="w"> </span>list-units<span class="w"> </span>--type<span class="o">=</span>service<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>k3s
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># If you see &#39;k3s.service&#39;:</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>systemctl<span class="w"> </span>restart<span class="w"> </span>k3s
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Verify it&#39;s running</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>systemctl<span class="w"> </span>status<span class="w"> </span>k3s
+</code></pre></div>
+<h4 id="on-worker-nodes">On Worker Nodes</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Check if it&#39;s a worker node service</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>systemctl<span class="w"> </span>list-units<span class="w"> </span>--type<span class="o">=</span>service<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>k3s
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># If you see &#39;k3s-agent.service&#39;:</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>systemctl<span class="w"> </span>restart<span class="w"> </span>k3s-agent
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># Verify it&#39;s running</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>systemctl<span class="w"> </span>status<span class="w"> </span>k3s-agent
+</code></pre></div>
+<h3 id="step-4-verify-configuration">Step 4: Verify Configuration</h3>
+<p>After configuring all nodes, verify the cluster is healthy:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Check all nodes are ready</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># Check k3s can access the registry by testing a deployment</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>kubectl<span class="w"> </span>create<span class="w"> </span>deployment<span class="w"> </span>test-harbor<span class="w"> </span>--image<span class="o">=</span><span class="m">192</span>.168.1.206:30002/library/your-image:latest<span class="w"> </span>-n<span class="w"> </span>test-namespace
+</code></pre></div>
+<h2 id="configuration-file-explanation">Configuration File Explanation</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nt">mirrors</span><span class="p">:</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="s">&quot;192.168.1.206:30002&quot;</span><span class="p p-Indicator">:</span><span class="w">           </span><span class="c1"># Your Harbor registry address</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;http://192.168.1.206:30002&quot;</span><span class="w"> </span><span class="c1"># Force HTTP protocol</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="nt">configs</span><span class="p">:</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span><span class="s">&quot;192.168.1.206:30002&quot;</span><span class="p p-Indicator">:</span><span class="w">           </span><span class="c1"># Same registry address</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="nt">tls</span><span class="p">:</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">      </span><span class="nt">insecure_skip_verify</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">    </span><span class="c1"># Allow insecure connections</span>
+</code></pre></div>
+<ul>
+<li><strong>mirrors</strong>: Defines registry endpoints</li>
+<li><strong>endpoint</strong>: Specifies the HTTP URL (not HTTPS)</li>
+<li><strong>insecure_skip_verify</strong>: Allows connections without TLS verification</li>
+</ul>
+<h2 id="common-node-configurations">Common Node Configurations</h2>
+<h3 id="single-node-cluster">Single Node Cluster</h3>
+<ul>
+<li>Configure the single node with both <code>mirrors</code> and <code>configs</code></li>
+<li>Restart the appropriate k3s service</li>
+</ul>
+<h3 id="multi-node-cluster">Multi-Node Cluster</h3>
+<ul>
+<li><strong>Control Plane</strong>: Usually runs <code>k3s.service</code></li>
+<li><strong>Worker Nodes</strong>: Usually run <code>k3s-agent.service</code></li>
+<li><strong>All nodes</strong> need the same <code>registries.yaml</code> configuration</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p>For detailed troubleshooting steps and solutions to common issues, see the dedicated
+<a href="../../troubleshooting/k8s-harbor-http-registry/">K8s Harbor HTTP Registry Troubleshooting Guide</a>.</p>
+<h3 id="quick-verification">Quick Verification</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Check node configuration</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>cat<span class="w"> </span>/etc/rancher/k3s/registries.yaml
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Check k3s service status</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>systemctl<span class="w"> </span>status<span class="w"> </span>k3s<span class="w">        </span><span class="c1"># or k3s-agent</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1"># Test registry connectivity</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>curl<span class="w"> </span>http://192.168.1.206:30002/v2/
+</code></pre></div>
+<h2 id="security-considerations">Security Considerations</h2>
+<h3 id="for-homelab-use">For Homelab Use</h3>
+<ul>
+<li>HTTP registries are acceptable for internal/homelab environments</li>
+<li>Ensure your network is properly segmented</li>
+<li>Use Harbor's built-in authentication</li>
+</ul>
+<h3 id="for-production">For Production</h3>
+<ul>
+<li><strong>Do not use HTTP registries in production</strong></li>
+<li>Configure Harbor with proper SSL certificates</li>
+<li>Use network policies to restrict access</li>
+</ul>
+<h2 id="alternative-https-setup">Alternative: HTTPS Setup</h2>
+<p>For production environments, consider setting up Harbor with HTTPS:</p>
+<ol>
+<li><strong>Generate SSL certificates</strong> (Let's Encrypt or self-signed)</li>
+<li><strong>Configure Harbor</strong> with SSL termination</li>
+<li><strong>Update k3s configuration</strong> to use HTTPS endpoints</li>
+<li><strong>Install certificates</strong> on all nodes if using self-signed</li>
+</ol>
+<h2 id="summary">Summary</h2>
+<p>This configuration allows your k3s cluster to pull images from a local Harbor HTTP registry by:</p>
+<ol>
+<li><strong>Creating <code>/etc/rancher/k3s/registries.yaml</code></strong> on all nodes</li>
+<li><strong>Configuring HTTP endpoints</strong> with <code>insecure_skip_verify</code></li>
+<li><strong>Restarting k3s services</strong> to apply changes</li>
+<li><strong>Verifying</strong> the configuration works</li>
+</ol>
+<p>Remember: This configuration must be applied to <strong>every node</strong> in your cluster for consistent image pulling across all pods.</p>
 
 
 

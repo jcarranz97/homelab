@@ -289,7 +289,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../guides/harbor-k8s-deployment/" class="md-tabs__link">
+        <a href="../../guides/k8s-cluster-setup/" class="md-tabs__link">
           
   
   
@@ -872,6 +872,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#important-http-registry-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Important: HTTP Registry Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#creating-pull-secrets" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -904,6 +915,17 @@
     <span class="md-ellipsis">
       
         Common Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Fixes
       
     </span>
   </a>
@@ -1031,6 +1053,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../guides/k8s-cluster-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Cluster Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../guides/harbor-k8s-deployment/" class="md-nav__link">
         
   
@@ -1039,6 +1089,34 @@
     
   
     Harbor & K8s Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/k8s-harbor-http-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Harbor HTTP Registry Setup
   
 
     
@@ -1156,6 +1234,34 @@
     
   
     Common Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/k8s-harbor-http-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Harbor HTTP Registry
   
 
     
@@ -1560,6 +1666,11 @@
 <li><strong>Admission Controllers</strong>: For image policy enforcement</li>
 <li><strong>Webhooks</strong>: For automated deployment triggers</li>
 </ol>
+<h3 id="important-http-registry-configuration">Important: HTTP Registry Configuration</h3>
+<p><strong>Before deploying to Kubernetes</strong>, you must configure all cluster nodes to allow HTTP connections to Harbor,
+since the registry runs on HTTP (not HTTPS).</p>
+<p>⚠️ <strong>Required Step</strong>: Follow the <a href="../../guides/k8s-harbor-http-registry/">K8s Harbor HTTP Registry Configuration Guide</a>
+to configure your cluster nodes. Without this configuration, pods will fail with <code>ImagePullBackOff</code> errors.</p>
 <h3 id="creating-pull-secrets">Creating Pull Secrets</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>kubectl<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>docker-registry<span class="w"> </span>harbor-secret<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>--docker-server<span class="o">=</span><span class="m">192</span>.168.1.206:30002<span class="w"> </span><span class="se">\</span>
@@ -1573,11 +1684,24 @@
 <li><strong>Login failures</strong>: Check credentials and network connectivity</li>
 <li><strong>Push failures</strong>: Verify project exists and you have push permissions</li>
 <li><strong>Pull failures in K8s</strong>: Ensure pull secrets are properly configured</li>
+<li><strong>ImagePullBackOff errors</strong>: Verify nodes are configured for HTTP registry access (see <a href="../../guides/k8s-harbor-http-registry/">K8s HTTP Registry Guide</a>)</li>
+<li><strong>HTTPS client errors</strong>: Configure cluster nodes to allow HTTP connections to Harbor</li>
 </ul>
+<h3 id="quick-fixes">Quick Fixes</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Test Harbor connectivity</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>http://192.168.1.206:30002/v2/
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Check if nodes can access Harbor</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>kubectl<span class="w"> </span>describe<span class="w"> </span>pod<span class="w"> </span>&lt;failing-pod&gt;<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Verify pull secret exists</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>kubectl<span class="w"> </span>get<span class="w"> </span>secrets<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+</code></pre></div>
 <h2 id="references">References</h2>
 <ul>
 <li><a href="https://goharbor.io/docs/">Harbor Documentation</a></li>
 <li><a href="../../guides/harbor-k8s-deployment/">Harbor &amp; K8s Deployment Guide</a></li>
+<li><a href="../../guides/k8s-harbor-http-registry/">K8s Harbor HTTP Registry Configuration</a></li>
 </ul>
 
 
