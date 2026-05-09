@@ -44,6 +44,8 @@ nav:
       - K8s Cluster Setup: guides/k8s-cluster-setup.md
       - Harbor & K8s Deployment: guides/harbor-k8s-deployment.md
       - K8s Harbor HTTP Registry Setup: guides/k8s-harbor-http-registry.md
+      - Pi-hole Local DNS Setup: guides/pi-hole-setup.md
+      - Rancher Setup: guides/rancher-setup.md
       - Getting Started: guides/getting-started.md
   - Troubleshooting:
       - Common Issues: troubleshooting/common-issues.md
