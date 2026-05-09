@@ -1,0 +1,2111 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="My personal homelab documentation.">
+      
+      
+      
+      
+        <link rel="prev" href="../pi-hole-setup/">
+      
+      
+        <link rel="next" href="../getting-started/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Rancher Setup - Homelab</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#installing-rancher-on-a-dedicated-homelab-node" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Homelab" class="md-header__button md-logo" aria-label="Homelab" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Homelab
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Rancher Setup
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jcarranz97/homelab" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jcarranz97/homelab
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../infrastructure/hardware/" class="md-tabs__link">
+          
+  
+  
+  Infrastructure
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../services/overview/" class="md-tabs__link">
+          
+  
+  
+  Services
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../k8s-cluster-setup/" class="md-tabs__link">
+          
+  
+  
+  Guides & How-tos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../troubleshooting/common-issues/" class="md-tabs__link">
+          
+  
+  
+  Troubleshooting
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/configs/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../repository/development-setup/" class="md-tabs__link">
+          
+  
+  
+  Repository
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Homelab" class="md-nav__button md-logo" aria-label="Homelab" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Homelab
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jcarranz97/homelab" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jcarranz97/homelab
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../infrastructure/hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hardware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../infrastructure/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Services
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Services
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services/harbor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registry (Harbor)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services/monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides & How-tos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides & How-tos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../k8s-cluster-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Cluster Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../harbor-k8s-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harbor & K8s Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../k8s-harbor-http-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Harbor HTTP Registry Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pi-hole-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pi-hole Local DNS Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rancher Setup
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rancher Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hardware-rancher-node" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hardware (Rancher node)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#software" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Software
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-prepare-the-rancher-node" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Prepare the Rancher Node
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-install-k3s-on-the-rancher-node" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Install k3s on the Rancher Node
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-install-helm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Install Helm
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-install-cert-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Install cert-manager
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-install-rancher-via-helm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Install Rancher via Helm
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-map-the-hostname-on-client-machines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Map the Hostname on Client Machines
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-first-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: First Login
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-import-the-existing-k3s-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Import the Existing k3s Cluster
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: Import the Existing k3s Cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-start-the-import-in-the-rancher-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Start the import in the Rancher UI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-apply-the-import-manifest-on-the-existing-k3s-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Apply the import manifest on the existing k3s cluster
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-make-rancherlocal-resolvable-from-inside-the-agent-pod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Make rancher.local resolvable from inside the agent pod
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-confirm-the-cluster-registers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Confirm the cluster registers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#helm-install-fails-with-host-invalid-value-must-be-a-dns-name-not-an-ip-address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Helm install fails with host: Invalid value: ... must be a DNS name, not an IP address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#browser-shows-err_name_not_resolved-dns_probe_finished_nxdomain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Browser shows ERR_NAME_NOT_RESOLVED / DNS_PROBE_FINISHED_NXDOMAIN
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rancher-pod-stuck-in-pending" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rancher pod stuck in Pending
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cluster-agent-on-the-existing-k3s-cant-connect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cluster agent on the existing k3s can't connect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forgot-the-bootstrap-password-before-first-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forgot the bootstrap password before first login
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-guides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Guides
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/common-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/k8s-harbor-http-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Harbor HTTP Registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/configs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration Files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Useful Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Repository
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/development-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/code-quality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code Quality Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/technologies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technologies Used
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="installing-rancher-on-a-dedicated-homelab-node">Installing Rancher on a Dedicated Homelab Node</h1>
+<p>This guide walks through installing <a href="https://www.rancher.com/">Rancher</a> on a dedicated Ubuntu machine in your
+homelab, then importing your existing k3s cluster so you can manage it from the Rancher UI.</p>
+<p>Rancher is installed on its own machine (separate from the cluster it manages) so the management plane stays
+available even when worker nodes are rebooted, upgraded, or experiencing issues.</p>
+<h2 id="overview">Overview</h2>
+<p>The setup looks like this:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌──────────────────────────┐         ┌──────────────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│  Rancher Node (this guide) │       │     Existing k3s Cluster (managed)   │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│  - Ubuntu Server           │       │  ┌──────────┐ ┌──────────┐ ┌────────┐│
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│  - Single-node k3s         │ ◄───► │  │ dell-01  │ │ nuc-01   │ │ ...    ││
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│  - Rancher (Helm)          │       │  │ (master) │ │ (worker) │ │        ││
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│  - cert-manager            │       │  └──────────┘ └──────────┘ └────────┘│
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>└──────────────────────────┘         └──────────────────────────────────────┘
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>       192.168.1.X                              192.168.1.208 (master)
+</code></pre></div>
+<p>The Rancher node runs its <strong>own</strong> single-node k3s — this is just a host for Rancher itself and is independent
+from the cluster you already use for workloads.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<h3 id="hardware-rancher-node">Hardware (Rancher node)</h3>
+<p>Rancher's <a href="https://ranchermanager.docs.rancher.com/getting-started/installation-and-upgrade/installation-requirements">official requirements</a>
+for a small management cluster:</p>
+<ul>
+<li><strong>CPU:</strong> 2 cores minimum (4 recommended)</li>
+<li><strong>RAM:</strong> 4 GB minimum (8 GB recommended)</li>
+<li><strong>Disk:</strong> 40 GB+ SSD</li>
+<li><strong>Network:</strong> Static IP on the same LAN as your k3s cluster</li>
+</ul>
+<h3 id="software">Software</h3>
+<ul>
+<li>Ubuntu Server 22.04 LTS or newer (clean install)</li>
+<li>SSH access from your management machine</li>
+<li><code>kubectl</code> and <code>helm</code> available locally (for managing the existing k3s cluster)</li>
+</ul>
+<h3 id="network">Network</h3>
+<ul>
+<li>The Rancher node and the existing k3s cluster nodes must be able to reach each other.</li>
+<li>TCP <strong>443</strong> must be reachable on the Rancher node from anywhere you'll open the UI.</li>
+<li>The existing k3s cluster nodes need outbound access to the Rancher node on <strong>443</strong> so the cluster agent can
+  register.</li>
+</ul>
+<h2 id="step-1-prepare-the-rancher-node">Step 1: Prepare the Rancher Node</h2>
+<p>On the dedicated Rancher machine:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Update system packages</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>upgrade<span class="w"> </span>-y
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Install basic utilities</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>wget
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># Set a recognizable hostname</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>sudo<span class="w"> </span>hostnamectl<span class="w"> </span>set-hostname<span class="w"> </span>rancher-01
+</code></pre></div>
+<p>Confirm the static IP is configured (via netplan or your router's DHCP reservation) and note it down — this
+guide uses <code>192.168.1.220</code> as a placeholder. <strong>Replace it with your actual IP throughout.</strong></p>
+<h2 id="step-2-install-k3s-on-the-rancher-node">Step 2: Install k3s on the Rancher Node</h2>
+<p>Rancher will run on its own single-node k3s. Disable Traefik so the NGINX ingress that ships with the Rancher
+chart can take over port 443.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Install k3s without Traefik</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>-sfL<span class="w"> </span>https://get.k3s.io<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh<span class="w"> </span>-s<span class="w"> </span>-<span class="w"> </span>--disable<span class="o">=</span>traefik<span class="w"> </span>--write-kubeconfig-mode<span class="o">=</span><span class="m">644</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Verify the node is Ready</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>sudo<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+</code></pre></div>
+<p>Set up <code>kubectl</code> for your user on this node. <strong>Do not copy the k3s kubeconfig over <code>~/.kube/config</code></strong> — if
+this machine already has a kubeconfig pointing at another cluster (e.g. your existing homelab k3s), that
+would silently overwrite it. Use a dedicated file and select it via <code>KUBECONFIG</code> instead:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.kube
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>sudo<span class="w"> </span>cp<span class="w"> </span>/etc/rancher/k3s/k3s.yaml<span class="w"> </span>~/.kube/k3s-local.yaml
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>sudo<span class="w"> </span>chown<span class="w"> </span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span>:<span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span>~/.kube/k3s-local.yaml
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># Point this shell at the local k3s. Run this in every shell where you&#39;ll</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># run helm/kubectl commands for the Rancher install.</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span>~/.kube/k3s-local.yaml
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="c1"># Verify — must show ONLY this node, not your existing homelab cluster nodes</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Before each <code>helm install</code> in the steps below, double-check with <code>kubectl get nodes</code> that you're talking
+to the local k3s. If you see your existing cluster's nodes, your shell is pointing at the wrong
+kubeconfig — re-run the <code>export KUBECONFIG=...</code> line above.</p>
+</div>
+<h2 id="step-3-install-helm">Step 3: Install Helm</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>helm<span class="w"> </span>version
+</code></pre></div>
+<h2 id="step-4-install-cert-manager">Step 4: Install cert-manager</h2>
+<p>Rancher needs cert-manager to issue its self-signed TLS certificate.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Add the Jetstack Helm repo</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>jetstack<span class="w"> </span>https://charts.jetstack.io
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>helm<span class="w"> </span>repo<span class="w"> </span>update
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="c1"># Install cert-manager with its CRDs</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>helm<span class="w"> </span>install<span class="w"> </span>cert-manager<span class="w"> </span>jetstack/cert-manager<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span>--namespace<span class="w"> </span>cert-manager<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span>--create-namespace<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span>--set<span class="w"> </span>crds.enabled<span class="o">=</span><span class="nb">true</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="c1"># Wait until all cert-manager pods are Running</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>kubectl<span class="w"> </span>-n<span class="w"> </span>cert-manager<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-w
+</code></pre></div>
+<p>Press <code>Ctrl+C</code> once all three pods (<code>cert-manager</code>, <code>cert-manager-cainjector</code>, <code>cert-manager-webhook</code>) are
+<code>Running</code>.</p>
+<h2 id="step-5-install-rancher-via-helm">Step 5: Install Rancher via Helm</h2>
+<p>Add the Rancher Helm repo. The <code>stable</code> channel is recommended for homelab use.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>rancher-stable<span class="w"> </span>https://releases.rancher.com/server-charts/stable
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>helm<span class="w"> </span>repo<span class="w"> </span>update
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>cattle-system
+</code></pre></div>
+<p>Install Rancher. The chart's Ingress requires <code>hostname</code> to be a <strong>DNS name</strong> — Kubernetes rejects raw IPs in
+<code>spec.rules[0].host</code>. For a local-only homelab the simplest approach is a fake hostname like <code>rancher.local</code>
+plus a hosts-file entry on the machines that browse the UI (covered in Step 6). No public DNS, no internet
+dependency, and Pi-hole will replace the hosts entries later with a single LAN-wide record.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>helm<span class="w"> </span>install<span class="w"> </span>rancher<span class="w"> </span>rancher-stable/rancher<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span>--namespace<span class="w"> </span>cattle-system<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span>--set<span class="w"> </span><span class="nv">hostname</span><span class="o">=</span>rancher.local<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span>--set<span class="w"> </span><span class="nv">replicas</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span>--set<span class="w"> </span><span class="nv">bootstrapPassword</span><span class="o">=</span>changeme-on-first-login<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span>--set<span class="w"> </span>ingress.tls.source<span class="o">=</span>rancher
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>replicas=1</code> is correct for a single-node k3s host. The default chart value is 3, which would leave two
+pods stuck in <code>Pending</code>.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Alternative: nip.io wildcard DNS</p>
+<p><a href="https://nip.io">nip.io</a> provides public DNS where <code>&lt;ip&gt;.nip.io</code> resolves to <code>&lt;ip&gt;</code> — useful when you
+don't want to manage hosts files. Install with <code>--set hostname=192.168.1.220.nip.io</code>. The catch: many
+home routers (and Pi-hole, once configured) block public DNS responses that point at private IPs (DNS
+rebind protection), so the lookup fails with <code>NXDOMAIN</code>. If that happens, fall back to the
+<code>rancher.local</code> + hosts-file approach above.</p>
+</div>
+<p>Wait for the rollout to finish:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>kubectl<span class="w"> </span>-n<span class="w"> </span>cattle-system<span class="w"> </span>rollout<span class="w"> </span>status<span class="w"> </span>deploy/rancher
+</code></pre></div>
+<p>This can take several minutes on the first run while images are pulled.</p>
+<h2 id="step-6-map-the-hostname-on-client-machines">Step 6: Map the Hostname on Client Machines</h2>
+<p>Before opening the UI, every device that needs to reach Rancher must resolve <code>rancher.local</code> to the Rancher
+node's IP. Add this line to the hosts file on each client (your laptop, etc.):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>192.168.1.220   rancher.local
+</code></pre></div>
+<ul>
+<li><strong>Linux / macOS:</strong> edit <code>/etc/hosts</code> with <code>sudo</code>.</li>
+<li><strong>Windows:</strong> edit <code>C:\Windows\System32\drivers\etc\hosts</code> as Administrator.</li>
+</ul>
+<p>Test resolution before opening the browser:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>ping<span class="w"> </span>rancher.local<span class="w">      </span><span class="c1"># should reply from 192.168.1.220</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The hosts-file entry only resolves the name for the <strong>host</strong> that has it. The cluster nodes that will be
+imported into Rancher (Step 8) need it on the host too — but that <strong>does not propagate into pods</strong>, which
+use CoreDNS instead. Step 8.3 covers the pod-side fix. The cleanest end state is Pi-hole on the LAN (see
+Next Steps), which serves the record to hosts and pods alike.</p>
+</div>
+<h2 id="step-7-first-login">Step 7: First Login</h2>
+<ol>
+<li>Open <code>https://rancher.local</code> in your browser. You'll see a TLS warning because the cert is self-signed —
+   click through (in Chrome, type <code>thisisunsafe</code> while the warning page is focused).</li>
+<li>The bootstrap password is the one you set in the Helm command (<code>changeme-on-first-login</code>). If you forgot
+   it, retrieve it with:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>kubectl<span class="w"> </span>-n<span class="w"> </span>cattle-system<span class="w"> </span>get<span class="w"> </span>secret<span class="w"> </span>bootstrap-secret<span class="w"> </span>-o<span class="w"> </span>go-template<span class="o">=</span><span class="s1">&#39;{{.data.bootstrapPassword|base64decode}}{{&quot;\n&quot;}}&#39;</span>
+</code></pre></div>
+<ol>
+<li>Set a strong admin password when prompted.</li>
+<li>Confirm the <strong>Server URL</strong> shown matches <code>https://rancher.local</code> and accept it.</li>
+</ol>
+<p>You should now land on the Rancher home page with the <strong>local</strong> cluster (the single-node k3s hosting Rancher
+itself) listed.</p>
+<h2 id="step-8-import-the-existing-k3s-cluster">Step 8: Import the Existing k3s Cluster</h2>
+<p>This is the step that connects Rancher to the cluster you already use for workloads.</p>
+<h3 id="81-start-the-import-in-the-rancher-ui">8.1 Start the import in the Rancher UI</h3>
+<ol>
+<li>In the top-left menu, click ☰ → <strong>Cluster Management</strong>.</li>
+<li>Click <strong>Import Existing</strong>.</li>
+<li>Choose the <strong>Generic</strong> option (works for any Kubernetes distribution, including k3s).</li>
+<li>Give the cluster a name (e.g. <code>homelab-k3s</code>) and click <strong>Create</strong>.</li>
+</ol>
+<p>Rancher will display two <code>kubectl apply</code> commands. Copy the second one — it looks like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>https://rancher.local/v3/import/&lt;long-token&gt;.yaml
+</code></pre></div>
+<h3 id="82-apply-the-import-manifest-on-the-existing-k3s-cluster">8.2 Apply the import manifest on the existing k3s cluster</h3>
+<p>From the machine where you already manage the existing cluster (i.e. where <code>kubectl get nodes</code> lists
+<code>dell-01</code>, <code>nuc-01</code>, etc.):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Verify you&#39;re pointed at the right cluster</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>kubectl<span class="w"> </span>config<span class="w"> </span>current-context
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="c1"># Apply the manifest from Rancher. Because Rancher uses a self-signed cert,</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="c1"># you&#39;ll need --insecure on the curl piped into kubectl:</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>curl<span class="w"> </span>--insecure<span class="w"> </span>-sfL<span class="w"> </span>https://rancher.local/v3/import/&lt;long-token&gt;.yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Running this directly on a k3s control plane node?</p>
+<p>On a k3s node, <code>/etc/rancher/k3s/k3s.yaml</code> is <code>root:root</code> mode 600 by default. If you don't have a
+user-level kubeconfig, plain <code>kubectl</code> fails with <code>permission denied</code>. Putting <code>sudo</code> only on <code>curl</code>
+doesn't help — it has to apply to the <strong>kubectl</strong> side of the pipe. Two options:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Option A: sudo the apply side and use the k3s-bundled kubectl</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>curl<span class="w"> </span>--insecure<span class="w"> </span>-sfL<span class="w"> </span>https://rancher.local/v3/import/&lt;long-token&gt;.yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>k3s<span class="w"> </span>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># Option B: run the whole pipeline as root</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>sudo<span class="w"> </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;curl --insecure -sfL https://rancher.local/v3/import/&lt;long-token&gt;.yaml | kubectl apply -f -&#39;</span>
+</code></pre></div>
+<p>Or set up a user-level kubeconfig once so plain <code>kubectl</code> works:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.kube
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>sudo<span class="w"> </span>cp<span class="w"> </span>/etc/rancher/k3s/k3s.yaml<span class="w"> </span>~/.kube/config
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>sudo<span class="w"> </span>chown<span class="w"> </span><span class="nv">$USER</span>:<span class="nv">$USER</span><span class="w"> </span>~/.kube/config
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>~/.kube/config
+</code></pre></div>
+</div>
+<p>This deploys the <code>cattle-cluster-agent</code> and <code>cattle-node-agent</code> into the existing cluster. They open an
+outbound connection back to the Rancher node on 443.</p>
+<h3 id="83-make-rancherlocal-resolvable-from-inside-the-agent-pod">8.3 Make <code>rancher.local</code> resolvable from inside the agent pod</h3>
+<p>This step is only needed if you're using the <code>rancher.local</code> + hosts-file approach (Step 5). The
+<code>cattle-cluster-agent</code> runs as a <strong>pod</strong>, and pods do <strong>not</strong> use the host's <code>/etc/hosts</code> — they resolve
+through CoreDNS, which has never heard of <code>rancher.local</code>. Without this step, the agent crash-loops with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>ERROR: https://rancher.local/ping is not accessible (Could not resolve host: rancher.local)
+</code></pre></div>
+<p>The quickest fix is to inject a hosts-file mapping into just the agent pod via <code>hostAliases</code>. Replace
+<code>192.168.1.220</code> with your Rancher node's IP:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>kubectl<span class="w"> </span>-n<span class="w"> </span>cattle-system<span class="w"> </span>patch<span class="w"> </span>deployment<span class="w"> </span>cattle-cluster-agent<span class="w"> </span>--type<span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="w"> </span>-p<span class="o">=</span><span class="s1">&#39;[</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="s1">  {&quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/spec/template/spec/hostAliases&quot;, &quot;value&quot;: [</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="s1">    {&quot;ip&quot;: &quot;192.168.1.220&quot;, &quot;hostnames&quot;: [&quot;rancher.local&quot;]}</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="s1">  ]}</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="s1">]&#39;</span>
+</code></pre></div>
+<p>That triggers a rollout. Watch the new pod come up:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>cattle-system<span class="w"> </span>-w
+</code></pre></div>
+<p>The pod should reach <code>Running</code> and stay there.</p>
+<div class="admonition warning">
+<p class="admonition-title">hostAliases is a workaround, not a permanent fix</p>
+<p>Rancher manages the <code>cattle-cluster-agent</code> deployment. Future agent updates (chart upgrades,
+re-imports, etc.) <strong>may overwrite</strong> this <code>hostAliases</code> patch, putting the pod back into
+<code>CrashLoopBackOff</code>. Reapply the same patch when that happens. The durable fixes are:</p>
+<ul>
+<li><strong>CoreDNS:</strong> add a <code>hosts</code> block to the cluster's CoreDNS configmap so every pod resolves
+  <code>rancher.local</code>, not just this one.</li>
+<li><strong>Pi-hole:</strong> serve the record from your LAN's DNS resolver and point CoreDNS upstream at it.
+  Covered in <strong>Next Steps</strong>.</li>
+</ul>
+</div>
+<h3 id="84-confirm-the-cluster-registers">8.4 Confirm the cluster registers</h3>
+<p>Watch the agent come up on the existing cluster:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>kubectl<span class="w"> </span>-n<span class="w"> </span>cattle-system<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-w
+</code></pre></div>
+<p>Back in the Rancher UI, the cluster will move from <strong>Pending</strong> → <strong>Waiting</strong> → <strong>Active</strong> within a few
+minutes. Once it's <code>Active</code>, all your existing nodes appear under <strong>Cluster Management → homelab-k3s →
+Nodes</strong>.</p>
+<h2 id="step-9-verification">Step 9: Verification</h2>
+<p>From the Rancher UI:</p>
+<ul>
+<li><strong>Cluster Dashboard</strong> for <code>homelab-k3s</code> should show node count, CPU, and memory matching your real cluster.</li>
+<li><strong>Workloads</strong> should list everything currently running — Harbor, ingress controllers, any test deployments,
+  etc.</li>
+<li><strong>Apps → Charts</strong> lets you install Helm charts onto the imported cluster directly from Rancher.</li>
+</ul>
+<p>From the CLI on the existing cluster:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># The agents should be Running, not CrashLoopBackOff</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>kubectl<span class="w"> </span>-n<span class="w"> </span>cattle-system<span class="w"> </span>get<span class="w"> </span>pods
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="c1"># Logs should show &quot;Connected&quot; / no repeating TLS errors</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>kubectl<span class="w"> </span>-n<span class="w"> </span>cattle-system<span class="w"> </span>logs<span class="w"> </span>deploy/cattle-cluster-agent<span class="w"> </span>--tail<span class="o">=</span><span class="m">50</span>
+</code></pre></div>
+<h2 id="common-issues">Common Issues</h2>
+<h3 id="helm-install-fails-with-host-invalid-value-must-be-a-dns-name-not-an-ip-address">Helm install fails with <code>host: Invalid value: ... must be a DNS name, not an IP address</code></h3>
+<p>The chart's Ingress rejects raw IPs in <code>spec.rules[0].host</code>. Pick a DNS name like <code>rancher.local</code> and re-run
+with <code>--set hostname=rancher.local</code>. See Step 5.</p>
+<h3 id="browser-shows-err_name_not_resolved-dns_probe_finished_nxdomain">Browser shows <code>ERR_NAME_NOT_RESOLVED</code> / <code>DNS_PROBE_FINISHED_NXDOMAIN</code></h3>
+<p>The client machine can't resolve the hostname. Two common causes:</p>
+<ul>
+<li><strong>Missing hosts entry.</strong> Add <code>192.168.1.220   rancher.local</code> to the client's hosts file (Step 6).</li>
+<li><strong>DNS rebind protection blocking nip.io.</strong> If you used <code>&lt;ip&gt;.nip.io</code> and your router (or Pi-hole) refuses
+  to return private IPs from public DNS, the lookup gets dropped. Switch to the <code>rancher.local</code> + hosts-file
+  approach.</li>
+</ul>
+<h3 id="rancher-pod-stuck-in-pending">Rancher pod stuck in <code>Pending</code></h3>
+<p>Almost always because <code>replicas</code> defaulted to 3 on a single-node k3s. Re-run the install with
+<code>--set replicas=1</code> or upgrade in place:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>rancher<span class="w"> </span>rancher-stable/rancher<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">  </span>--namespace<span class="w"> </span>cattle-system<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">  </span>--reuse-values<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">  </span>--set<span class="w"> </span><span class="nv">replicas</span><span class="o">=</span><span class="m">1</span>
+</code></pre></div>
+<h3 id="cluster-agent-on-the-existing-k3s-cant-connect">Cluster agent on the existing k3s can't connect</h3>
+<p>The agent error is usually one of:</p>
+<ul>
+<li><strong><code>Could not resolve host: rancher.local</code></strong> (in <code>kubectl logs -n cattle-system deploy/cattle-cluster-agent</code>)
+  — the <strong>pod</strong> can't resolve the hostname even if the host can. Pods use CoreDNS, not <code>/etc/hosts</code>. Apply the
+  <code>hostAliases</code> patch from Step 8.3.</li>
+<li><strong><code>no such host</code> from the host machine itself</strong> — when running <code>curl https://rancher.local</code> on a node and
+  it fails: that node is missing the <code>/etc/hosts</code> entry. Add it, or set up Pi-hole.</li>
+<li><strong><code>x509: certificate signed by unknown authority</code></strong> — the agent doesn't trust Rancher's self-signed cert.
+  Re-apply the import manifest using <code>curl --insecure</code> as shown in Step 8.2, <strong>and</strong> make sure the
+  <code>CATTLE_SERVER</code> value inside the manifest matches the Server URL configured in Rancher (Step 7, item 4).</li>
+<li><strong><code>dial tcp ...:443: i/o timeout</code></strong> — firewall or routing problem between the cluster nodes and the Rancher
+  node. Test with <code>curl -k https://rancher.local</code> from one of the existing cluster nodes.</li>
+</ul>
+<h3 id="forgot-the-bootstrap-password-before-first-login">Forgot the bootstrap password before first login</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>kubectl<span class="w"> </span>-n<span class="w"> </span>cattle-system<span class="w"> </span>get<span class="w"> </span>secret<span class="w"> </span>bootstrap-secret<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="w">  </span>-o<span class="w"> </span>go-template<span class="o">=</span><span class="s1">&#39;{{.data.bootstrapPassword|base64decode}}{{&quot;\n&quot;}}&#39;</span>
+</code></pre></div>
+<p>If the secret is gone, reset the admin password from inside the Rancher pod:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>kubectl<span class="w"> </span>-n<span class="w"> </span>cattle-system<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>deploy/rancher<span class="w"> </span>--<span class="w"> </span>reset-password
+</code></pre></div>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><strong>DNS:</strong> Replace the per-device hosts entries with a Pi-hole record so every device on the LAN resolves
+  <code>rancher.local</code> (or a new name like <code>rancher.home</code>) automatically. See the
+  <a href="../pi-hole-setup/">Pi-hole Local DNS Setup guide</a>. If you keep the same hostname, no Helm change is
+  needed — just remove the hosts entries. If you switch hostnames, upgrade in place:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>rancher<span class="w"> </span>rancher-stable/rancher<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">  </span>--namespace<span class="w"> </span>cattle-system<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">  </span>--reuse-values<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="w">  </span>--set<span class="w"> </span><span class="nv">hostname</span><span class="o">=</span>rancher.home
+</code></pre></div>
+<p>Then update the Server URL in <strong>Global Settings → server-url</strong>.</p>
+<ul>
+<li><strong>Backups:</strong> Install the <a href="https://ranchermanager.docs.rancher.com/how-to-guides/advanced-user-guides/backup-restore-and-disaster-recovery">rancher-backup</a>
+  Helm chart on the Rancher node so you can recover the management state if the box dies.</li>
+<li><strong>Monitoring:</strong> From the imported cluster's <strong>Apps</strong> tab, install the Rancher Monitoring chart for
+  Prometheus + Grafana with prebuilt dashboards.</li>
+<li><strong>Upgrades:</strong> Track new Rancher releases and upgrade with <code>helm upgrade rancher rancher-stable/rancher
+  --reuse-values --version &lt;new-version&gt;</code>.</li>
+</ul>
+<h2 id="related-guides">Related Guides</h2>
+<ul>
+<li><a href="../k8s-cluster-setup/">K8s Cluster Setup</a> — initial k3s cluster this guide imports</li>
+<li><a href="../harbor-k8s-deployment/">Harbor &amp; K8s Deployment</a> — registry running on the imported cluster</li>
+<li><a href="../pi-hole-setup/">Pi-hole Local DNS Setup</a> — for replacing IP access with a hostname</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js"></script>
+      
+    
+  </body>
+</html>

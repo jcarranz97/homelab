@@ -1,0 +1,2024 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="My personal homelab documentation.">
+      
+      
+      
+      
+        <link rel="prev" href="../k8s-harbor-http-registry/">
+      
+      
+        <link rel="next" href="../rancher-setup/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Pi-hole Local DNS Setup - Homelab</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pi-hole-as-local-dns-for-the-homelab" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Homelab" class="md-header__button md-logo" aria-label="Homelab" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Homelab
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Pi-hole Local DNS Setup
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jcarranz97/homelab" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jcarranz97/homelab
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../infrastructure/hardware/" class="md-tabs__link">
+          
+  
+  
+  Infrastructure
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../services/overview/" class="md-tabs__link">
+          
+  
+  
+  Services
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../k8s-cluster-setup/" class="md-tabs__link">
+          
+  
+  
+  Guides & How-tos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../troubleshooting/common-issues/" class="md-tabs__link">
+          
+  
+  
+  Troubleshooting
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/configs/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../repository/development-setup/" class="md-tabs__link">
+          
+  
+  
+  Repository
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Homelab" class="md-nav__button md-logo" aria-label="Homelab" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Homelab
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jcarranz97/homelab" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jcarranz97/homelab
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../infrastructure/hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hardware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../infrastructure/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Services
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Services
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services/harbor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registry (Harbor)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services/monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides & How-tos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides & How-tos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../k8s-cluster-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Cluster Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../harbor-k8s-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harbor & K8s Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../k8s-harbor-http-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Harbor HTTP Registry Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pi-hole Local DNS Setup
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pi-hole Local DNS Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-free-port-53-on-the-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Free Port 53 on the Host
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-create-the-pi-hole-compose-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Create the Pi-hole Compose File
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-add-the-wildcard-dns-record" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Add the Wildcard DNS Record
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-point-the-lan-at-pi-hole" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Point the LAN at Pi-hole
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-expose-a-k8s-application-via-ingress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Expose a k8s Application via Ingress
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: Expose a k8s Application via Ingress">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#simple-example-fast-api-docker-in-test-namespace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Simple Example: fast-api-docker in test-namespace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-example-colony-dev-frontend-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Example: colony-dev (Frontend + Backend)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-more-apps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding More Apps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Hardening
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rancher-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rancher Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/common-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/k8s-harbor-http-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    K8s Harbor HTTP Registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/configs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration Files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Useful Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resources
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Repository
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/development-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/code-quality/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code Quality Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../repository/technologies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technologies Used
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="pi-hole-as-local-dns-for-the-homelab">Pi-hole as Local DNS for the Homelab</h1>
+<p>This guide walks through running Pi-hole in Docker on an always-on server so the homelab can reach
+services by hostname (e.g. <code>harbor.dev.lan</code>, <code>colony.dev.lan</code>) instead of by IP and port.</p>
+<p>Pi-hole acts as the LAN's DNS server: every device on the network asks it to resolve names, and we
+configure it with a wildcard record that points <code>*.dev.lan</code> at the k3s ingress IP. Traefik (built
+into k3s) then routes requests by hostname.</p>
+<p>As a bonus, Pi-hole filters ads and trackers at the DNS level for every device on the network.</p>
+<h2 id="overview">Overview</h2>
+<pre class="mermaid"><code>flowchart LR
+    Client[Laptop / Phone] --&gt;|DNS query: harbor.dev.lan| PiHole[Pi-hole&lt;br/&gt;always-on server]
+    PiHole --&gt;|*.dev.lan rewrite| K3sIP[k3s node IP]
+    Client --&gt;|HTTP request&lt;br/&gt;Host: harbor.dev.lan| Traefik[Traefik Ingress]
+    Traefik --&gt; Harbor[Harbor pod]
+    PiHole --&gt;|public domains| Upstream[1.1.1.1 / 9.9.9.9]</code></pre>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>An always-on server on the LAN (separate from the k3s nodes recommended) with a static IP.</li>
+<li>Docker and Docker Compose installed on that server.</li>
+<li>Admin access to the home router (to change the DHCP DNS server setting).</li>
+<li>A planned hostname suffix for internal services. This guide uses <code>dev.lan</code>. <strong>Do not use
+  <code>.local</code></strong> — it conflicts with mDNS/Bonjour and causes intermittent resolution failures.</li>
+</ul>
+<h2 id="step-1-free-port-53-on-the-host">Step 1: Free Port 53 on the Host</h2>
+<p>On Ubuntu/Debian hosts, <code>systemd-resolved</code> listens on <code>127.0.0.53:53</code> and will conflict with
+Pi-hole. Disable its stub listener:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/systemd/resolved.conf.d
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/systemd/resolved.conf.d/disable-stub-listener.conf<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF&#39;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="s">[Resolve]</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="s">DNSStubListener=no</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="s">EOF</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># Replace the symlinked resolv.conf so the host can still resolve names while Pi-hole boots</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>sudo<span class="w"> </span>rm<span class="w"> </span>/etc/resolv.conf
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;nameserver 1.1.1.1&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/resolv.conf
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>systemd-resolved
+</code></pre></div>
+<p>Verify nothing is listening on port 53:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>ss<span class="w"> </span>-tulpn<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>:53
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># Expect no output</span>
+</code></pre></div>
+<h2 id="step-2-create-the-pi-hole-compose-file">Step 2: Create the Pi-hole Compose File</h2>
+<p>Pick a directory for persistent data, e.g. <code>/opt/pihole</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/pihole/<span class="o">{</span>etc-pihole,etc-dnsmasq.d<span class="o">}</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">cd</span><span class="w"> </span>/opt/pihole
+</code></pre></div>
+<p>Create <code>docker-compose.yml</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">services</span><span class="p">:</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">pihole</span><span class="p">:</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pihole</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pihole/pihole:latest</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="c1"># Host networking is the simplest path — Pi-hole binds directly to the LAN interface,</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="c1"># no port mapping gymnastics, and clients see the real source IP in query logs.</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">      </span><span class="nt">TZ</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;America/Mexico_City&#39;</span><span class="w">           </span><span class="c1"># set to your timezone</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">      </span><span class="nt">WEBPASSWORD</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;CHANGE-ME-STRONG-PW&#39;</span><span class="w">  </span><span class="c1"># admin UI password</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">      </span><span class="nt">PIHOLE_DNS_</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1.1.1.1;9.9.9.9&#39;</span><span class="w">      </span><span class="c1"># upstream resolvers</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">      </span><span class="nt">DNSMASQ_LISTENING</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;local&#39;</span><span class="w">          </span><span class="c1"># only answer queries from the LAN</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">      </span><span class="nt">VIRTUAL_HOST</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;pihole.dev.lan&#39;</span><span class="w">      </span><span class="c1"># admin UI hostname</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./etc-pihole:/etc/pihole</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./etc-dnsmasq.d:/etc/dnsmasq.d</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NET_ADMIN</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Bind to the LAN interface only</p>
+<p><code>DNSMASQ_LISTENING: local</code> tells Pi-hole to refuse queries that arrive from outside its
+subnet. Combined with <strong>never port-forwarding port 53 on the router</strong>, this prevents the
+server from being abused as an open resolver in DNS amplification attacks.</p>
+</div>
+<p>Bring it up:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>sudo<span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>pihole<span class="w">   </span><span class="c1"># watch the first boot</span>
+</code></pre></div>
+<h2 id="step-3-add-the-wildcard-dns-record">Step 3: Add the Wildcard DNS Record</h2>
+<p>This is the rule that makes <code>harbor.dev.lan</code>, <code>colony.dev.lan</code>, and any other <code>*.dev.lan</code> host
+resolve to the k3s ingress IP.</p>
+<p>First, find the IP that Traefik is listening on:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>traefik
+</code></pre></div>
+<p>Look at the <code>EXTERNAL-IP</code> column. In this homelab the Traefik service is exposed at
+<code>192.168.1.206</code> and <code>192.168.1.208</code> (k3s's built-in service load balancer publishes one IP per
+node). Either IP works — pick one and use it consistently.</p>
+<p>Create <code>/opt/pihole/etc-dnsmasq.d/02-homelab.conf</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a># Wildcard: every *.dev.lan name (and any sub-subdomain like api.colony.dev.lan)
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a># resolves to the Traefik ingress IP.
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>address=/dev.lan/192.168.1.206
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">dnsmasq wildcards match all sub-levels</p>
+<p><code>address=/dev.lan/...</code> matches <code>harbor.dev.lan</code>, <code>colony.dev.lan</code>, AND
+<code>api.colony.dev.lan</code>, <code>foo.bar.dev.lan</code>, etc. One line covers every internal hostname.</p>
+</div>
+<p>Reload Pi-hole's DNS:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>sudo<span class="w"> </span>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>pihole<span class="w"> </span>pihole<span class="w"> </span>restartdns
+</code></pre></div>
+<p>Test from another machine on the LAN:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>dig<span class="w"> </span>@&lt;pihole-ip&gt;<span class="w"> </span>harbor.dev.lan<span class="w"> </span>+short
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># Expect: 192.168.1.206</span>
+</code></pre></div>
+<h2 id="step-4-point-the-lan-at-pi-hole">Step 4: Point the LAN at Pi-hole</h2>
+<p>Tell every device on the network to use Pi-hole for DNS. The cleanest way is at the router:</p>
+<ol>
+<li>Log in to the home router admin UI.</li>
+<li>Find <strong>DHCP settings</strong> (often under LAN or Network).</li>
+<li>Set <strong>Primary DNS</strong> to the Pi-hole server's static IP.</li>
+<li>Set <strong>Secondary DNS</strong> to a public resolver (<code>1.1.1.1</code> or <code>9.9.9.9</code>) — see the trade-off note
+   below.</li>
+<li>Save and either restart the router or wait for DHCP leases to renew (usually under an hour).</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Secondary DNS trade-off</p>
+<p>A public secondary keeps the internet working when Pi-hole is down, but clients will
+silently fall back and <code>*.dev.lan</code> won't resolve. Two options:</p>
+<ul>
+<li><strong>Pragmatic:</strong> keep the public secondary. Accept that Pi-hole going down breaks the
+  internal hostnames temporarily.</li>
+<li><strong>Strict:</strong> leave the secondary blank. Internal names always work, but a Pi-hole outage
+  breaks DNS for the whole household until it's restored.</li>
+</ul>
+</div>
+<p>Force a renewal on the device you're testing from, then check:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># macOS</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>scutil<span class="w"> </span>--dns<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>nameserver
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Linux</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>resolvectl<span class="w"> </span>status
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>nslookup<span class="w"> </span>harbor.dev.lan
+</code></pre></div>
+<h2 id="step-5-expose-a-k8s-application-via-ingress">Step 5: Expose a k8s Application via Ingress</h2>
+<p>With DNS in place, the last piece is an <code>Ingress</code> resource per application that maps a hostname
+to a Service inside the cluster. Traefik (built into k3s) reads these and starts routing.</p>
+<p>The general pattern:</p>
+<ol>
+<li>Identify the Service name, namespace, and port you want to expose.</li>
+<li>Choose a hostname under your wildcard suffix (e.g. <code>&lt;app&gt;.dev.lan</code>).</li>
+<li>Apply an Ingress that routes that hostname to the Service.</li>
+<li>Browse to <code>http://&lt;app&gt;.dev.lan</code>.</li>
+</ol>
+<p>The two examples below show this pattern at two levels of complexity: a single-service API, then
+a frontend + backend application.</p>
+<h3 id="simple-example-fast-api-docker-in-test-namespace">Simple Example: <code>fast-api-docker</code> in <code>test-namespace</code></h3>
+<p>This is the smallest possible case — one Deployment, one Service, one hostname. Inspect what's
+running:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>-n<span class="w"> </span>test-namespace
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>NAME                      TYPE       CLUSTER-IP    PORT(S)
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>fast-api-docker-service   NodePort   10.43.56.94   80:30470/TCP
+</code></pre></div>
+<p>The Service listens on port <strong>80</strong> internally (the <code>80:30470</code> means "container port 80, exposed
+as NodePort 30470"). The Ingress will target port 80, the NodePort becomes irrelevant once the
+hostname is in place.</p>
+<p><strong>Pick a hostname</strong> — <code>fast-api.dev.lan</code> is descriptive and already covered by the <code>*.dev.lan</code>
+wildcard, so no Pi-hole changes are needed.</p>
+<p><strong>Create the Ingress</strong> as <code>fast-api-ingress.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fast-api</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-namespace</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">traefik</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fast-api.dev.lan</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">            </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">            </span><span class="nt">backend</span><span class="p">:</span>
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="w">              </span><span class="nt">service</span><span class="p">:</span>
+<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fast-api-docker-service</span>
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="w">                </span><span class="nt">port</span><span class="p">:</span>
+<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+<p><strong>Apply and verify:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>fast-api-ingress.yaml
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>test-namespace
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># NAME       CLASS     HOSTS              ADDRESS                       PORTS</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="c1"># fast-api   traefik   fast-api.dev.lan   192.168.1.206,192.168.1.208   80</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>curl<span class="w"> </span>-I<span class="w"> </span>http://fast-api.dev.lan
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="c1"># HTTP/1.1 200 OK   (or 404 / docs response, depending on the API&#39;s root route)</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="c1"># FastAPI auto-generated docs:</span>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>open<span class="w"> </span>http://fast-api.dev.lan/docs
+</code></pre></div>
+<p>That's the entire flow for a single-service app. Once this works, multi-service apps are just
+the same thing repeated.</p>
+<h3 id="advanced-example-colony-dev-frontend-backend">Advanced Example: <code>colony-dev</code> (Frontend + Backend)</h3>
+<p>The <code>colony-dev</code> namespace runs three services:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>-n<span class="w"> </span>colony-dev
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>NAME                    TYPE        CLUSTER-IP      PORT(S)
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>colony-dev-frontend     NodePort    10.43.129.82    3000:30081/TCP
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>colony-dev-backend      NodePort    10.43.88.200    8000:30801/TCP
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>colony-dev-postgresql   ClusterIP   10.43.139.235   5432/TCP
+</code></pre></div>
+<p>Today these are reached via NodePort (<code>http://&lt;node-ip&gt;:30081</code>, <code>http://&lt;node-ip&gt;:30801</code>). After
+this step you'll reach them by name instead.</p>
+<div class="admonition warning">
+<p class="admonition-title">Do not expose internal services</p>
+<p>Only expose what end users need: <strong>frontend</strong> and <strong>backend</strong>. The PostgreSQL service is
+<code>ClusterIP</code>-only by design — it must stay reachable only from inside the cluster. Never
+create an Ingress for a database.</p>
+</div>
+<p><strong>Choose hostnames.</strong> Two clean options:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Frontend</th>
+<th>Backend</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Subdomain (recommended)</td>
+<td><code>colony.dev.lan</code></td>
+<td><code>api.colony.dev.lan</code></td>
+<td>Cleanest. Frontend and backend are independently routed; no path-rewrite headaches; CORS stays simple.</td>
+</tr>
+<tr>
+<td>Path-based</td>
+<td><code>colony.dev.lan/</code></td>
+<td><code>colony.dev.lan/api</code></td>
+<td>Single hostname, but you'll likely need path stripping middleware so the backend doesn't see <code>/api</code> in its routes.</td>
+</tr>
+</tbody>
+</table>
+<p>This guide uses the subdomain pattern. Both hostnames are covered by the existing <code>*.dev.lan</code>
+wildcard, so <strong>no Pi-hole changes are needed when adding new apps</strong> — you only edit Pi-hole when
+you add a brand-new TLD or want a record outside the wildcard.</p>
+<p><strong>Create the Ingress manifest.</strong> Save as <code>colony-dev-ingress.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">colony-dev-frontend</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">colony-dev</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">traefik</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">colony.dev.lan</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a><span class="w">            </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="w">            </span><span class="nt">backend</span><span class="p">:</span>
+<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a><span class="w">              </span><span class="nt">service</span><span class="p">:</span>
+<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a><span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">colony-dev-frontend</span>
+<a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a><span class="w">                </span><span class="nt">port</span><span class="p">:</span>
+<a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a><span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3000</span>
+<a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a><span class="nn">---</span>
+<a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<a id="__codelineno-16-22" name="__codelineno-16-22" href="#__codelineno-16-22"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-16-23" name="__codelineno-16-23" href="#__codelineno-16-23"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">colony-dev-backend</span>
+<a id="__codelineno-16-24" name="__codelineno-16-24" href="#__codelineno-16-24"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">colony-dev</span>
+<a id="__codelineno-16-25" name="__codelineno-16-25" href="#__codelineno-16-25"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-16-26" name="__codelineno-16-26" href="#__codelineno-16-26"></a><span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">traefik</span>
+<a id="__codelineno-16-27" name="__codelineno-16-27" href="#__codelineno-16-27"></a><span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<a id="__codelineno-16-28" name="__codelineno-16-28" href="#__codelineno-16-28"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api.colony.dev.lan</span>
+<a id="__codelineno-16-29" name="__codelineno-16-29" href="#__codelineno-16-29"></a><span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<a id="__codelineno-16-30" name="__codelineno-16-30" href="#__codelineno-16-30"></a><span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
+<a id="__codelineno-16-31" name="__codelineno-16-31" href="#__codelineno-16-31"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<a id="__codelineno-16-32" name="__codelineno-16-32" href="#__codelineno-16-32"></a><span class="w">            </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<a id="__codelineno-16-33" name="__codelineno-16-33" href="#__codelineno-16-33"></a><span class="w">            </span><span class="nt">backend</span><span class="p">:</span>
+<a id="__codelineno-16-34" name="__codelineno-16-34" href="#__codelineno-16-34"></a><span class="w">              </span><span class="nt">service</span><span class="p">:</span>
+<a id="__codelineno-16-35" name="__codelineno-16-35" href="#__codelineno-16-35"></a><span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">colony-dev-backend</span>
+<a id="__codelineno-16-36" name="__codelineno-16-36" href="#__codelineno-16-36"></a><span class="w">                </span><span class="nt">port</span><span class="p">:</span>
+<a id="__codelineno-16-37" name="__codelineno-16-37" href="#__codelineno-16-37"></a><span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
+</code></pre></div>
+<p>A few notes on the manifest:</p>
+<ul>
+<li><code>namespace: colony-dev</code> — Ingresses must live in the same namespace as the Service they target.</li>
+<li><code>port.number: 3000</code> / <code>8000</code> — these are the <strong>Service ports</strong>, not the NodePort ports. Look at
+  the first number in the <code>PORT(S)</code> column of <code>kubectl get svc</code>.</li>
+<li><code>ingressClassName: traefik</code> — matches the IngressClass already installed in your cluster
+  (verify with <code>kubectl get ingressclass</code>).</li>
+<li>The Services can stay <code>NodePort</code> or be changed to <code>ClusterIP</code>. Either works for ingress
+  routing. <code>ClusterIP</code> is slightly tidier since the NodePort fallback is no longer needed.</li>
+</ul>
+<p><strong>Apply and verify:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>colony-dev-ingress.yaml
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>colony-dev
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="c1"># NAME                  CLASS     HOSTS                   ADDRESS                           PORTS</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="c1"># colony-dev-frontend   traefik   colony.dev.lan          192.168.1.206,192.168.1.208       80</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="c1"># colony-dev-backend    traefik   api.colony.dev.lan      192.168.1.206,192.168.1.208       80</span>
+</code></pre></div>
+<p>From a LAN client (the Pi-hole change must already be live):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>dig<span class="w"> </span>colony.dev.lan<span class="w"> </span>+short<span class="w">          </span><span class="c1"># → 192.168.1.206</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>dig<span class="w"> </span>api.colony.dev.lan<span class="w"> </span>+short<span class="w">      </span><span class="c1"># → 192.168.1.206</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>curl<span class="w"> </span>-I<span class="w"> </span>http://colony.dev.lan<span class="w">      </span><span class="c1"># → HTTP 200 from the frontend</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>curl<span class="w"> </span>-I<span class="w"> </span>http://api.colony.dev.lan<span class="w">  </span><span class="c1"># → HTTP 200/404 from the backend (depends on root route)</span>
+</code></pre></div>
+<p>Open <code>http://colony.dev.lan</code> in a browser. If the frontend talks to the backend, point its API
+base URL to <code>http://api.colony.dev.lan</code> (whatever env var or config drives that — typically a
+<code>VITE_API_URL</code>, <code>NEXT_PUBLIC_API_URL</code>, or similar in the frontend Deployment).</p>
+<h3 id="adding-more-apps">Adding More Apps</h3>
+<p>Repeat the pattern. To expose Harbor, for example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">harbor</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">harbor</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">traefik</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">harbor.dev.lan</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="w">            </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a><span class="w">            </span><span class="nt">backend</span><span class="p">:</span>
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="w">              </span><span class="nt">service</span><span class="p">:</span>
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a><span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">harbor</span><span class="w">          </span><span class="c1"># check the actual Service name with `kubectl get svc -n harbor`</span>
+<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a><span class="w">                </span><span class="nt">port</span><span class="p">:</span>
+<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+<p>No Pi-hole changes needed — the wildcard already covers <code>harbor.dev.lan</code>.</p>
+<h2 id="security-hardening">Security Hardening</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Open resolver abuse (DNS amplification)</td>
+<td><code>DNSMASQ_LISTENING: local</code> set above. <strong>Never</strong> port-forward <code>53/tcp</code> or <code>53/udp</code> on the router.</td>
+</tr>
+<tr>
+<td>Admin UI compromise</td>
+<td>Strong <code>WEBPASSWORD</code>; access only over LAN. Do not expose <code>/admin</code> externally.</td>
+</tr>
+<tr>
+<td>Query log privacy</td>
+<td>Pi-hole logs every DNS query by default. Reduce retention in <strong>Settings → Privacy</strong>, or set the privacy level to "Anonymous logging" if other people share the network.</td>
+</tr>
+<tr>
+<td>Single point of failure</td>
+<td>Public secondary DNS at the router (covered above), or run a second Pi-hole and sync with <a href="https://github.com/vmstan/gravity-sync">gravity-sync</a>.</td>
+</tr>
+<tr>
+<td>Stale upstream / poisoning</td>
+<td>Use trustworthy upstreams (Cloudflare <code>1.1.1.1</code>, Quad9 <code>9.9.9.9</code>); enable DNSSEC under <strong>Settings → DNS</strong> if upstreams support it.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="maintenance">Maintenance</h2>
+<p><strong>Update Pi-hole:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nb">cd</span><span class="w"> </span>/opt/pihole
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>sudo<span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>pull
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>sudo<span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
+<p><strong>Back up settings.</strong></p>
+<p>The <code>etc-pihole/</code> and <code>etc-dnsmasq.d/</code> directories contain everything. A periodic copy to a
+different host (or to a backup folder on the k3s cluster) is enough to restore the full
+configuration.</p>
+<p><strong>Add another internal hostname.</strong></p>
+<p>Either rely on the wildcard (just create the Ingress — no DNS change needed), or add a specific
+record in <code>etc-dnsmasq.d/02-homelab.conf</code> and <code>pihole restartdns</code>.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p><strong><code>docker compose up</code> fails with "address already in use" on port 53.</strong>
+<code>systemd-resolved</code> is still bound. Re-run Step 1 and verify with <code>sudo ss -tulpn | grep :53</code>.</p>
+<p><strong>Clients still resolve <code>harbor.dev.lan</code> to NXDOMAIN.</strong>
+The device is using cached DNS or a different resolver. Renew the DHCP lease, then check
+<code>resolvectl status</code> (Linux) or <code>scutil --dns</code> (macOS) to confirm the device is actually using
+Pi-hole.</p>
+<p><strong>Pi-hole resolves the name but the browser shows a Traefik 404.</strong>
+DNS is working; the Ingress is wrong. Check <code>kubectl get ingress -A</code> and confirm the <code>host:</code>
+field matches exactly, and that the backing Service exists in the same namespace.</p>
+<p><strong>Pi-hole admin UI is unreachable.</strong>
+With host networking the UI is on <code>http://&lt;pihole-ip&gt;/admin</code>, port 80. Confirm nothing else on
+the host is using port 80, and check <code>docker logs pihole</code>.</p>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><strong>HTTPS for internal services.</strong> Either install <a href="https://github.com/FiloSottile/mkcert">mkcert</a>
+  on every client device for self-signed certs on <code>*.dev.lan</code>, or buy a real domain (~$10/yr) and
+  use cert-manager with Let's Encrypt's DNS-01 challenge. The Ingress YAML stays the same — you
+  just add a <code>tls:</code> block referencing a Secret that cert-manager populates.</li>
+<li><strong>Single ingress IP.</strong> k3s's built-in service load balancer publishes Traefik on every node IP
+  (here <code>192.168.1.206</code> and <code>192.168.1.208</code>). If you want a single floating IP that survives a
+  node going offline, swap servicelb for <a href="https://metallb.universe.tf/">MetalLB</a> in
+  <code>L2</code> mode and update the Pi-hole wildcard to point at that IP.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js"></script>
+      
+    
+  </body>
+</html>
