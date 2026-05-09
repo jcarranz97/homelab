@@ -23,7 +23,7 @@ My homelab consists of:
 
 ## What You'll Find Here
 
-- 🏗️ **[Infrastructure](infrastructure/overview.md)**: Hardware setup, network configuration, and cluster details
+- 🏗️ **[Infrastructure](infrastructure/hardware.md)**: Hardware setup, network configuration, and cluster details
 - ⚙️ **[Services](services/overview.md)**: Applications and services running in the homelab
 - 📚 **[Guides & How-tos](guides/getting-started.md)**: Step-by-step tutorials and deployment guides
 - 🔧 **[Troubleshooting](troubleshooting/common-issues.md)**: Solutions to common issues I've encountered

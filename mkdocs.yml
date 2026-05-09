@@ -32,10 +32,8 @@ theme:
 nav:
   - Home: index.md
   - Infrastructure:
-      - Overview: infrastructure/overview.md
       - Hardware: infrastructure/hardware.md
       - Network: infrastructure/network.md
-      - Kubernetes Cluster: infrastructure/kubernetes.md
   - Services:
       - Overview: services/overview.md
       - Registry (Harbor): services/harbor.md
