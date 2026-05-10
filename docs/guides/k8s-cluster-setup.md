@@ -163,12 +163,73 @@ kubectl delete namespace test-namespace
 
 ### 4.2 Test Harbor Integration
 
-Once Harbor is configured:
+Once Harbor is configured, deploy a real image from your registry to confirm the full
+Harbor → k8s pull path works end-to-end. The example below uses the `fast-api-docker` image
+already in Harbor at
+[`library/fast-api-docker`](http://192.168.1.206:30002/harbor/projects/1/repositories/fast-api-docker/artifacts-tab).
+
+The Service uses `NodePort` so the app is reachable on every node IP at a high port, which is
+all that's needed to verify Harbor itself is working:
+
+```yaml title="fast-api-test.yaml"
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fast-api-docker
+  namespace: test-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fast-api-docker
+  template:
+    metadata:
+      labels:
+        app: fast-api-docker
+    spec:
+      imagePullSecrets:
+        - name: harbor-secret
+      containers:
+        - name: fast-api-docker
+          image: 192.168.1.206:30002/library/fast-api-docker:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fast-api-docker-service
+  namespace: test-namespace
+spec:
+  type: NodePort
+  selector:
+    app: fast-api-docker
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+```
+
+Apply and verify:
 
 ```bash
-# Test pulling from Harbor registry
-kubectl create deployment test-harbor --image=192.168.1.206:30002/library/your-app:latest -n test-namespace
+kubectl apply -f fast-api-test.yaml
+kubectl get pods,svc -n test-namespace
 ```
+
+The app is now reachable on the assigned NodePort, e.g. `http://192.168.1.206:<node-port>`
+(read the port from the `PORT(S)` column of `kubectl get svc`). FastAPI's auto-generated docs
+are at `/docs`.
+
+!!! tip "Reach the app by hostname instead of IP:port"
+    NodePort access is enough to confirm Harbor is working, but for day-to-day use you'll want
+    a clean URL like `http://fast-api.dev.lan` with no port number. See **Configure Ingress**
+    in *Common Post-Setup Tasks* below to expose this same Deployment through Traefik.
+
+!!! tip "NodePort vs Ingress"
+    Both access paths coexist — adding the Ingress doesn't remove the NodePort. Once Ingress
+    is working you can switch the Service `type` from `NodePort` to `ClusterIP` to drop the
+    now-unused NodePort.
 
 ## Cluster Architecture
 
@@ -201,13 +262,91 @@ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 kubectl completion bash | sudo tee /etc/bash_completion.d/kubectl
 ```
 
-### 4.2 Configure Ingress (To be added)
+### 4.2 Configure Ingress
 
-For production-like deployments, consider setting up an ingress controller:
+For production-like deployments, expose your apps through an **ingress controller** so they're
+reachable by hostname (e.g. `http://fast-api.dev.lan`) instead of by IP and port. The
+controller listens on a single LAN address and routes requests to the right Service based on
+the `Host:` header in the incoming HTTP request.
 
-- Traefik (comes with k3s by default)
-- Nginx Ingress Controller
-- Cloudflare Tunnel integration
+#### Traefik (default in k3s)
+
+k3s ships with **Traefik** preinstalled and exposed via its built-in service load balancer at
+`192.168.1.206` / `192.168.1.208` on port 80. No separate install step is needed — verify it's
+running:
+
+```bash
+kubectl get ingressclass
+# NAME      CONTROLLER                      AGE
+# traefik   traefik.io/ingress-controller   ...
+
+kubectl get svc -n kube-system traefik
+# TYPE           EXTERNAL-IP                   PORT(S)
+# LoadBalancer   192.168.1.206,192.168.1.208   80:32103/TCP,443:32192/TCP
+```
+
+#### Add an Ingress for the Test App
+
+Building on the `fast-api-docker` Deployment from *Test Harbor Integration* above, create an
+`Ingress` that maps a hostname to its Service:
+
+```yaml title="fast-api-ingress.yaml"
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fast-api
+  namespace: test-namespace
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: fast-api.dev.lan
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fast-api-docker-service
+                port:
+                  number: 80
+```
+
+```bash
+kubectl apply -f fast-api-ingress.yaml
+kubectl get ingress -n test-namespace
+# NAME       CLASS     HOSTS              ADDRESS                       PORTS
+# fast-api   traefik   fast-api.dev.lan   192.168.1.206,192.168.1.208   80
+```
+
+#### Resolve the Hostname
+
+Until a LAN-wide DNS server is set up, add a temporary entry to `/etc/hosts` on each client
+machine that needs access:
+
+```text
+192.168.1.206  fast-api.dev.lan
+```
+
+Then visit `http://fast-api.dev.lan` (FastAPI's docs at `/docs`). The request flows:
+browser → Traefik on port 80 → matches the `Host:` header → forwards to
+`fast-api-docker-service:80` → pod.
+
+For a permanent solution that covers `*.dev.lan` for every device on the LAN — without
+per-host edits — see the [Pi-hole Local DNS Setup](pi-hole-setup.md) guide.
+
+!!! tip "NodePort vs Ingress"
+    Both access paths coexist — adding the Ingress doesn't remove the NodePort. Once Ingress
+    is working you can switch the Service `type` from `NodePort` to `ClusterIP` to drop the
+    now-unused NodePort.
+
+#### Alternative Ingress Controllers
+
+Traefik covers most homelab needs, but other options exist:
+
+- **Nginx Ingress Controller** — broader feature set and middleware ecosystem; useful if you
+  outgrow Traefik's defaults.
+- **Cloudflare Tunnel** — exposes services to the public internet without opening ports on
+  your router; a fit for remote access without a VPN.
 
 ### 4.3 Monitoring Setup (To be added)
 
