@@ -1055,13 +1055,63 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#42-configure-ingress-to-be-added" class="md-nav__link">
+  <a href="#42-configure-ingress" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4.2 Configure Ingress (To be added)
+        4.2 Configure Ingress
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="4.2 Configure Ingress">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#traefik-default-in-k3s" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Traefik (default in k3s)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-an-ingress-for-the-test-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add an Ingress for the Test App
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resolve-the-hostname" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolve the Hostname
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alternative-ingress-controllers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternative Ingress Controllers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1869,39 +1919,158 @@ registry. Follow the <a href="../k8s-harbor-http-registry/">K8s Harbor HTTP Regi
 <a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>namespace<span class="w"> </span>test-namespace
 </code></pre></div>
 <h3 id="42-test-harbor-integration">4.2 Test Harbor Integration</h3>
-<p>Once Harbor is configured:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Test pulling from Harbor registry</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>kubectl<span class="w"> </span>create<span class="w"> </span>deployment<span class="w"> </span>test-harbor<span class="w"> </span>--image<span class="o">=</span><span class="m">192</span>.168.1.206:30002/library/your-app:latest<span class="w"> </span>-n<span class="w"> </span>test-namespace
+<p>Once Harbor is configured, deploy a real image from your registry to confirm the full
+Harbor → k8s pull path works end-to-end. The example below uses the <code>fast-api-docker</code> image
+already in Harbor at
+<a href="http://192.168.1.206:30002/harbor/projects/1/repositories/fast-api-docker/artifacts-tab"><code>library/fast-api-docker</code></a>.</p>
+<p>The Service uses <code>NodePort</code> so the app is reachable on every node IP at a high port, which is
+all that's needed to verify Harbor itself is working:</p>
+<div class="highlight"><span class="filename">fast-api-test.yaml</span><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fast-api-docker</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-namespace</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fast-api-docker</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fast-api-docker</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">      </span><span class="nt">imagePullSecrets</span><span class="p">:</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">harbor-secret</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fast-api-docker</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.1.206:30002/library/fast-api-docker:latest</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">          </span><span class="nt">ports</span><span class="p">:</span>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="nn">---</span>
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fast-api-docker-service</span>
+<a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-namespace</span>
+<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NodePort</span>
+<a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a><span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a><span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fast-api-docker</span>
+<a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a><span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<a id="__codelineno-7-35" name="__codelineno-7-35" href="#__codelineno-7-35"></a><span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<a id="__codelineno-7-36" name="__codelineno-7-36" href="#__codelineno-7-36"></a><span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
 </code></pre></div>
+<p>Apply and verify:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>fast-api-test.yaml
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods,svc<span class="w"> </span>-n<span class="w"> </span>test-namespace
+</code></pre></div>
+<p>The app is now reachable on the assigned NodePort, e.g. <code>http://192.168.1.206:&lt;node-port&gt;</code>
+(read the port from the <code>PORT(S)</code> column of <code>kubectl get svc</code>). FastAPI's auto-generated docs
+are at <code>/docs</code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Reach the app by hostname instead of IP:port</p>
+<p>NodePort access is enough to confirm Harbor is working, but for day-to-day use you'll want
+a clean URL like <code>http://fast-api.dev.lan</code> with no port number. See <strong>Configure Ingress</strong>
+in <em>Common Post-Setup Tasks</em> below to expose this same Deployment through Traefik.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">NodePort vs Ingress</p>
+<p>Both access paths coexist — adding the Ingress doesn't remove the NodePort. Once Ingress
+is working you can switch the Service <code>type</code> from <code>NodePort</code> to <code>ClusterIP</code> to drop the
+now-unused NodePort.</p>
+</div>
 <h2 id="cluster-architecture">Cluster Architecture</h2>
 <p>Your completed cluster should look like this:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>│   Control Plane │    │   Worker Node   │    │   Worker Node   │
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>│    (dell-01)    │    │    (nuc-01)     │    │    (node-03)    │
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>│  192.168.1.208  │    │  192.168.1.206  │    │  192.168.1.xxx  │
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>└─────────────────┘    └─────────────────┘    └─────────────────┘
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>         │                       │                       │
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>         └───────────────────────┼───────────────────────┘
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>                                 │
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>                    ┌─────────────────┐
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>                    │  Harbor Registry │
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>                    │ 192.168.1.206:30002 │
-<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>                    └─────────────────┘
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>│   Control Plane │    │   Worker Node   │    │   Worker Node   │
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>│    (dell-01)    │    │    (nuc-01)     │    │    (node-03)    │
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>│  192.168.1.208  │    │  192.168.1.206  │    │  192.168.1.xxx  │
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>└─────────────────┘    └─────────────────┘    └─────────────────┘
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>         │                       │                       │
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>         └───────────────────────┼───────────────────────┘
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>                                 │
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>                    ┌─────────────────┐
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>                    │  Harbor Registry │
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>                    │ 192.168.1.206:30002 │
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>                    └─────────────────┘
 </code></pre></div>
 <h2 id="common-post-setup-tasks">Common Post-Setup Tasks</h2>
 <h3 id="41-install-additional-tools">4.1 Install Additional Tools</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Install Helm (package manager for Kubernetes)</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>curl<span class="w"> </span>https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Install kubectl bash completion</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>kubectl<span class="w"> </span>completion<span class="w"> </span>bash<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/bash_completion.d/kubectl
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Install Helm (package manager for Kubernetes)</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>curl<span class="w"> </span>https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Install kubectl bash completion</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>kubectl<span class="w"> </span>completion<span class="w"> </span>bash<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/bash_completion.d/kubectl
 </code></pre></div>
-<h3 id="42-configure-ingress-to-be-added">4.2 Configure Ingress (To be added)</h3>
-<p>For production-like deployments, consider setting up an ingress controller:</p>
+<h3 id="42-configure-ingress">4.2 Configure Ingress</h3>
+<p>For production-like deployments, expose your apps through an <strong>ingress controller</strong> so they're
+reachable by hostname (e.g. <code>http://fast-api.dev.lan</code>) instead of by IP and port. The
+controller listens on a single LAN address and routes requests to the right Service based on
+the <code>Host:</code> header in the incoming HTTP request.</p>
+<h4 id="traefik-default-in-k3s">Traefik (default in k3s)</h4>
+<p>k3s ships with <strong>Traefik</strong> preinstalled and exposed via its built-in service load balancer at
+<code>192.168.1.206</code> / <code>192.168.1.208</code> on port 80. No separate install step is needed — verify it's
+running:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingressclass
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="c1"># NAME      CONTROLLER                      AGE</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="c1"># traefik   traefik.io/ingress-controller   ...</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>traefik
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="c1"># TYPE           EXTERNAL-IP                   PORT(S)</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="c1"># LoadBalancer   192.168.1.206,192.168.1.208   80:32103/TCP,443:32192/TCP</span>
+</code></pre></div>
+<h4 id="add-an-ingress-for-the-test-app">Add an Ingress for the Test App</h4>
+<p>Building on the <code>fast-api-docker</code> Deployment from <em>Test Harbor Integration</em> above, create an
+<code>Ingress</code> that maps a hostname to its Service:</p>
+<div class="highlight"><span class="filename">fast-api-ingress.yaml</span><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fast-api</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-namespace</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">traefik</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fast-api.dev.lan</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">            </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">            </span><span class="nt">backend</span><span class="p">:</span>
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="w">              </span><span class="nt">service</span><span class="p">:</span>
+<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fast-api-docker-service</span>
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="w">                </span><span class="nt">port</span><span class="p">:</span>
+<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>fast-api-ingress.yaml
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>test-namespace
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="c1"># NAME       CLASS     HOSTS              ADDRESS                       PORTS</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># fast-api   traefik   fast-api.dev.lan   192.168.1.206,192.168.1.208   80</span>
+</code></pre></div>
+<h4 id="resolve-the-hostname">Resolve the Hostname</h4>
+<p>Until a LAN-wide DNS server is set up, add a temporary entry to <code>/etc/hosts</code> on each client
+machine that needs access:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>192.168.1.206  fast-api.dev.lan
+</code></pre></div>
+<p>Then visit <code>http://fast-api.dev.lan</code> (FastAPI's docs at <code>/docs</code>). The request flows:
+browser → Traefik on port 80 → matches the <code>Host:</code> header → forwards to
+<code>fast-api-docker-service:80</code> → pod.</p>
+<p>For a permanent solution that covers <code>*.dev.lan</code> for every device on the LAN — without
+per-host edits — see the <a href="../pi-hole-setup/">Pi-hole Local DNS Setup</a> guide.</p>
+<div class="admonition tip">
+<p class="admonition-title">NodePort vs Ingress</p>
+<p>Both access paths coexist — adding the Ingress doesn't remove the NodePort. Once Ingress
+is working you can switch the Service <code>type</code> from <code>NodePort</code> to <code>ClusterIP</code> to drop the
+now-unused NodePort.</p>
+</div>
+<h4 id="alternative-ingress-controllers">Alternative Ingress Controllers</h4>
+<p>Traefik covers most homelab needs, but other options exist:</p>
 <ul>
-<li>Traefik (comes with k3s by default)</li>
-<li>Nginx Ingress Controller</li>
-<li>Cloudflare Tunnel integration</li>
+<li><strong>Nginx Ingress Controller</strong> — broader feature set and middleware ecosystem; useful if you
+  outgrow Traefik's defaults.</li>
+<li><strong>Cloudflare Tunnel</strong> — exposes services to the public internet without opening ports on
+  your router; a fit for remote access without a VPN.</li>
 </ul>
 <h3 id="43-monitoring-setup-to-be-added">4.3 Monitoring Setup (To be added)</h3>
 <p>Consider adding monitoring to your cluster:</p>
