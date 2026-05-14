@@ -843,6 +843,161 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#hostname-access-via-ingress-httpharbordevlan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hostname Access via Ingress (http://harbor.dev.lan)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hostname Access via Ingress (http://harbor.dev.lan)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#assumptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Assumptions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-1-create-the-ingress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 — Create the Ingress
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-resolve-harbordevlan-to-a-node-ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 — Resolve harbor.dev.lan to a node IP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-update-harbors-externalurl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3 — Update Harbor's externalURL
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3 — Update Harbor&#39;s externalURL">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3a-capture-the-current-helm-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3a. Capture the current Helm values
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3b-add-or-change-externalurl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3b. Add or change externalURL
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3c-add-the-harbor-chart-repo-and-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3c. Add the Harbor chart repo and upgrade
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-trust-harbordevlan-on-every-k3s-node" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4 — Trust harbor.dev.lan on every k3s node
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-trust-harbordevlan-in-your-local-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5 — Trust harbor.dev.lan in your local Docker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-verify-end-to-end" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6 — Verify end-to-end
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coexistence-both-urls-still-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coexistence: both URLs still work
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notes-on-https" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes on HTTPS
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#troubleshooting" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1678,6 +1833,296 @@ to configure your cluster nodes. Without this configuration, pods will fail with
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>--docker-password<span class="o">=</span>&lt;password&gt;<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span>--namespace<span class="o">=</span>&lt;target-namespace&gt;
 </code></pre></div>
+<h2 id="hostname-access-via-ingress-httpharbordevlan">Hostname Access via Ingress (<code>http://harbor.dev.lan</code>)</h2>
+<p>By default, Harbor in this homelab is reached via its NodePort at
+<code>http://192.168.1.206:30002</code>. To expose it at a clean hostname like
+<code>http://harbor.dev.lan</code> — the same pattern used by <a href="https://github.com/jcarranz97/colony">Colony</a>
+(<code>colony.dev.lan</code>, <code>api.colony.dev.lan</code>) — add a standalone Traefik Ingress
+in front of Harbor's existing NodePort service. The Ingress and the NodePort
+<strong>coexist</strong>: both URLs keep working, which makes the migration safe to do
+gradually.</p>
+<p>This setup uses the Harbor Helm release that's already running in the cluster
+(release name <code>harbor</code>, namespace <code>harbor-system</code>). <strong>You do not need to
+re-install Harbor or have the chart locally</strong> — the Ingress is a plain
+Kubernetes manifest that targets Harbor's existing <code>harbor</code> Service.</p>
+<h3 id="assumptions">Assumptions</h3>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Harbor namespace</td>
+<td><code>harbor-system</code></td>
+</tr>
+<tr>
+<td>Harbor Service name</td>
+<td><code>harbor</code> (NodePort, port 80 → targetPort 8080)</td>
+</tr>
+<tr>
+<td>Helm release name</td>
+<td><code>harbor</code></td>
+</tr>
+<tr>
+<td>New hostname</td>
+<td><code>harbor.dev.lan</code></td>
+</tr>
+<tr>
+<td>Existing NodePort URL</td>
+<td><code>http://192.168.1.206:30002</code> (stays working)</td>
+</tr>
+<tr>
+<td>Ingress controller</td>
+<td>Traefik (ships with k3s)</td>
+</tr>
+<tr>
+<td>Node IPs</td>
+<td><code>192.168.1.208</code> (control-plane), <code>192.168.1.206</code> (worker)</td>
+</tr>
+</tbody>
+</table>
+<p>Verify your release name and service before continuing:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>helm<span class="w"> </span>list<span class="w"> </span>-n<span class="w"> </span>harbor-system
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># NAME    NAMESPACE       REVISION  ...  CHART          APP VERSION</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1"># harbor  harbor-system   1         ...  harbor-1.13.1  2.9.1</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>-n<span class="w"> </span>harbor-system<span class="w"> </span>harbor
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># NAME    TYPE       CLUSTER-IP    PORT(S)        AGE</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># harbor  NodePort   10.43.72.54   80:30002/TCP   ...</span>
+</code></pre></div>
+<h3 id="step-1-create-the-ingress">Step 1 — Create the Ingress</h3>
+<p>Harbor's front-facing <code>harbor</code> Service routes both the web UI <strong>and</strong> the
+container registry API (<code>/v2/...</code>) through the same nginx pod, so a single
+Ingress rule covering <code>/</code> is enough for both UI access and <code>docker push</code> /
+<code>docker pull</code> traffic.</p>
+<p>Save the following as <code>harbor-ingress.yaml</code>:</p>
+<div class="highlight"><span class="filename">harbor-ingress.yaml</span><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">harbor</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">harbor-system</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="nt">spec</span><span class="p">:</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">traefik</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">harbor.dev.lan</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">            </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">            </span><span class="nt">backend</span><span class="p">:</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">              </span><span class="nt">service</span><span class="p">:</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">harbor</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">                </span><span class="nt">port</span><span class="p">:</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+<p>Apply it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>harbor-ingress.yaml
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>harbor-system
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># NAME    CLASS     HOSTS            ADDRESS                       PORTS</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1"># harbor  traefik   harbor.dev.lan   192.168.1.206,192.168.1.208   80</span>
+</code></pre></div>
+<p>The <code>ADDRESS</code> column lists the IPs of every node running Traefik — those are
+the IPs that <code>harbor.dev.lan</code> needs to resolve to.</p>
+<blockquote>
+<p><strong>Why no <code>client-max-body-size</code> annotation?</strong> Traefik 3.x streams request
+bodies and does not impose a default body-size limit, so multi-GB image
+layer uploads through the Ingress work without extra configuration. (This
+is different from nginx-ingress, which defaults to <code>1m</code> and needs an
+override for registry traffic.)</p>
+</blockquote>
+<h3 id="step-2-resolve-harbordevlan-to-a-node-ip">Step 2 — Resolve <code>harbor.dev.lan</code> to a node IP</h3>
+<p>Until LAN-wide DNS is in place, add a hosts entry on every machine that
+needs access (including each k3s node — see Step 4):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>192.168.1.206  harbor.dev.lan
+</code></pre></div>
+<p>Linux/macOS: <code>/etc/hosts</code>. Windows: <code>C:\Windows\System32\drivers\etc\hosts</code>.</p>
+<p>For a permanent solution across every device, see the
+<a href="../../guides/pi-hole-setup/">Pi-hole Local DNS Setup</a> guide and add a
+<code>harbor.dev.lan</code> A-record (or a <code>*.dev.lan</code> wildcard that covers it).</p>
+<p>Verify resolution and the UI:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>getent<span class="w"> </span>hosts<span class="w"> </span>harbor.dev.lan<span class="w">   </span><span class="c1"># → 192.168.1.206</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>curl<span class="w"> </span>-I<span class="w"> </span>http://harbor.dev.lan<span class="w"> </span><span class="c1"># → HTTP/1.1 200 OK</span>
+</code></pre></div>
+<p>Open <code>http://harbor.dev.lan</code> in a browser — you should see the Harbor login
+page. At this point the <strong>UI works through the new hostname</strong>, but
+<code>docker login harbor.dev.lan</code> will not yet succeed because Harbor still
+advertises the old URL in its token-auth challenge. Continue to Step 3 to
+fix that.</p>
+<h3 id="step-3-update-harbors-externalurl">Step 3 — Update Harbor's <code>externalURL</code></h3>
+<p>The Harbor registry uses <strong>token-based authentication</strong>: when a Docker
+client hits <code>/v2/</code>, Harbor returns a <code>WWW-Authenticate</code> header pointing
+the client at Harbor's token service. That URL is built from the chart's
+<code>externalURL</code> value, which currently still points at the NodePort URL. As a
+result, <code>docker login harbor.dev.lan</code> ends up trying to fetch a token from
+<code>http://192.168.1.206:30002/service/token</code> — confusing and brittle.</p>
+<p>Update <code>externalURL</code> so the token URLs match the hostname clients use.</p>
+<h4 id="3a-capture-the-current-helm-values">3a. Capture the current Helm values</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>helm<span class="w"> </span>get<span class="w"> </span>values<span class="w"> </span>harbor<span class="w"> </span>-n<span class="w"> </span>harbor-system<span class="w"> </span>&gt;<span class="w"> </span>harbor-values.yaml
+</code></pre></div>
+<p>This pulls the existing user-supplied values from the release stored in
+the cluster — you don't need the original chart files on disk to do this.</p>
+<h4 id="3b-add-or-change-externalurl">3b. Add or change <code>externalURL</code></h4>
+<p>Edit <code>harbor-values.yaml</code> and set:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nt">externalURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://harbor.dev.lan</span>
+</code></pre></div>
+<p>Leave <code>expose.type: nodePort</code> (or whatever it is) alone — the NodePort
+service stays in place, so <code>http://192.168.1.206:30002</code> keeps working as a
+fallback. The only thing changing is the URL Harbor emits in its API
+responses.</p>
+<h4 id="3c-add-the-harbor-chart-repo-and-upgrade">3c. Add the Harbor chart repo and upgrade</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Add the upstream Harbor chart repository</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>harbor<span class="w"> </span>https://helm.goharbor.io
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>helm<span class="w"> </span>repo<span class="w"> </span>update
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="c1"># Upgrade the existing release in-place using the chart version that&#39;s</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="c1"># already deployed (check `helm list -n harbor-system` for the version).</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>helm<span class="w"> </span>upgrade<span class="w"> </span>harbor<span class="w"> </span>harbor/harbor<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span>--namespace<span class="w"> </span>harbor-system<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span>--version<span class="w"> </span><span class="m">1</span>.13.1<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">  </span>-f<span class="w"> </span>harbor-values.yaml
+</code></pre></div>
+<p>Pin the <code>--version</code> to the version returned by <code>helm list</code> so you don't
+accidentally upgrade Harbor itself at the same time you're tweaking config.
+Run a separate, deliberate upgrade later if you want a newer version.</p>
+<p>Watch the rollout:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>kubectl<span class="w"> </span>rollout<span class="w"> </span>status<span class="w"> </span>deployment<span class="w"> </span>harbor-core<span class="w"> </span>-n<span class="w"> </span>harbor-system
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>kubectl<span class="w"> </span>rollout<span class="w"> </span>status<span class="w"> </span>deployment<span class="w"> </span>harbor-nginx<span class="w"> </span>-n<span class="w"> </span>harbor-system
+</code></pre></div>
+<h3 id="step-4-trust-harbordevlan-on-every-k3s-node">Step 4 — Trust <code>harbor.dev.lan</code> on every k3s node</h3>
+<p>Each k3s node has a <code>registries.yaml</code> that lists insecure HTTP mirrors. You
+already configured <code>192.168.1.206:30002</code>; add <code>harbor.dev.lan</code> alongside
+it. Without this, <code>containerd</code> on the nodes will refuse to pull images
+referenced as <code>harbor.dev.lan/...</code> because they're served over plain HTTP.</p>
+<p>SSH into each node and edit <code>/etc/rancher/k3s/registries.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">mirrors</span><span class="p">:</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="s">&quot;192.168.1.206:30002&quot;</span><span class="p p-Indicator">:</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;http://192.168.1.206:30002&quot;</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span><span class="s">&quot;harbor.dev.lan&quot;</span><span class="p p-Indicator">:</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;http://harbor.dev.lan&quot;</span>
+</code></pre></div>
+<p>Then restart k3s on that node:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Control plane (dell-01)</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>k3s
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># Worker (nuc-01)</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>k3s-agent
+</code></pre></div>
+<p>Each node also needs to resolve <code>harbor.dev.lan</code> — either via Pi-hole, or
+by adding the hosts entry from Step 2 to each node's <code>/etc/hosts</code>.</p>
+<p>Verify:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w">   </span><span class="c1"># all nodes Ready</span>
+</code></pre></div>
+<p>For full background on why this step is required, see
+<a href="../../guides/k8s-harbor-http-registry/">K8s Harbor HTTP Registry Setup</a>.</p>
+<h3 id="step-5-trust-harbordevlan-in-your-local-docker">Step 5 — Trust <code>harbor.dev.lan</code> in your local Docker</h3>
+<p>On the development machine you push images from, add <code>harbor.dev.lan</code> to
+Docker's <code>insecure-registries</code> next to the existing entry. The exact path
+depends on your Docker installation (see the
+<a href="https://github.com/jcarranz97/colony/blob/main/docs/architecture/deployment.md#step-1--harbor-setup-one-time">Colony deployment guide</a>
+for native-WSL2 vs Docker Desktop variants):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="p">{</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">  </span><span class="nt">&quot;insecure-registries&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;192.168.1.206:30002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;harbor.dev.lan&quot;</span><span class="p">]</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>Restart the Docker daemon</strong> so it actually re-reads <code>daemon.json</code> — this
+step is easy to forget and is the most common cause of <code>docker login</code>
+failing immediately after the edit:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># systemd-based (native Linux, or WSL2 with systemd enabled)</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>docker
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1"># fallback (WSL2 without systemd)</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>sudo<span class="w"> </span>service<span class="w"> </span>docker<span class="w"> </span>restart
+</code></pre></div>
+<p>Then verify the daemon picked up the new entry:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>docker<span class="w"> </span>info<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">&quot;Insecure Registries&quot;</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="c1"># Should list both 192.168.1.206:30002 and harbor.dev.lan</span>
+</code></pre></div>
+<blockquote>
+<p><strong>Symptom if you skip the restart:</strong> <code>docker login harbor.dev.lan</code> fails
+with <code>tls: failed to verify certificate: x509: certificate is valid for
+...traefik.default, not harbor.dev.lan</code>. That's Traefik's default
+self-signed cert on port 443 being rejected because the daemon is still
+running with the old config and hasn't been told to treat
+<code>harbor.dev.lan</code> as insecure. Restart Docker and retry.</p>
+<p><strong>Docker Desktop users:</strong> if Docker runs via Docker Desktop's WSL
+integration (no <code>dockerd</code> process inside WSL), editing
+<code>/etc/docker/daemon.json</code> inside WSL has no effect — the daemon lives in
+Docker Desktop's VM. Set <code>insecure-registries</code> from <strong>Settings → Docker
+Engine</strong> on the Windows side and click <strong>Apply &amp; restart</strong> instead.</p>
+</blockquote>
+<h3 id="step-6-verify-end-to-end">Step 6 — Verify end-to-end</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># UI</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>curl<span class="w"> </span>-I<span class="w"> </span>http://harbor.dev.lan
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="c1"># HTTP/1.1 200 OK</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="c1"># Registry handshake</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>curl<span class="w"> </span>-I<span class="w"> </span>http://harbor.dev.lan/v2/
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="c1"># HTTP/1.1 401 Unauthorized   ← expected; means auth challenge works</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="c1"># Www-Authenticate: Bearer realm=&quot;http://harbor.dev.lan/service/token&quot;,...</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="c1">#                                ^^ should now say harbor.dev.lan, not the IP</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="c1"># Login</span>
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>docker<span class="w"> </span>login<span class="w"> </span>harbor.dev.lan
+<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a><span class="c1"># Username: admin</span>
+<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a><span class="c1"># Password: ********</span>
+<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a><span class="c1"># Login Succeeded</span>
+<a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a>
+<a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a><span class="c1"># Tag and push a small image as a smoke test</span>
+<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a>docker<span class="w"> </span>pull<span class="w"> </span>alpine:3.20
+<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a>docker<span class="w"> </span>tag<span class="w"> </span>alpine:3.20<span class="w"> </span>harbor.dev.lan/library/alpine:3.20
+<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a>docker<span class="w"> </span>push<span class="w"> </span>harbor.dev.lan/library/alpine:3.20
+<a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a>
+<a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a><span class="c1"># Then verify pull works from the cluster&#39;s perspective</span>
+<a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a>kubectl<span class="w"> </span>run<span class="w"> </span>alpine-test<span class="w"> </span>--rm<span class="w"> </span>-it<span class="w"> </span>--restart<span class="o">=</span>Never<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a><span class="w">  </span>--image<span class="o">=</span>harbor.dev.lan/library/alpine:3.20<span class="w"> </span>--<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>ok
+</code></pre></div>
+<p>If the <code>Www-Authenticate</code> realm in the second <code>curl</code> still points at
+<code>192.168.1.206:30002</code>, the <code>externalURL</code> change didn't take effect — check
+that <code>helm get values harbor -n harbor-system</code> shows your updated value and
+re-roll the <code>harbor-core</code> and <code>harbor-nginx</code> deployments.</p>
+<h3 id="coexistence-both-urls-still-work">Coexistence: both URLs still work</h3>
+<p>After this setup, Harbor is reachable via <strong>both</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>URL</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http://harbor.dev.lan</code></td>
+<td>New primary URL — UI and <code>docker push/pull</code> from clients that have DNS for <code>harbor.dev.lan</code></td>
+</tr>
+<tr>
+<td><code>http://192.168.1.206:30002</code></td>
+<td>Fallback — still resolvable from clients that haven't been migrated. UI works; <code>docker login</code> works but the auth-challenge URL will redirect through <code>harbor.dev.lan</code>, so the client also needs DNS for that name.</td>
+</tr>
+</tbody>
+</table>
+<p>To gracefully migrate existing image references in deployments, update
+their Helm values from <code>image.registry: "192.168.1.206:30002"</code> to
+<code>image.registry: "harbor.dev.lan"</code> at a comfortable pace. Pods already
+running on the old URL keep working — the change only matters at the next
+image pull.</p>
+<h3 id="notes-on-https">Notes on HTTPS</h3>
+<p>This Ingress serves plain HTTP, matching how the rest of the homelab is
+currently configured. When you eventually add TLS to Traefik (cert-manager
++ Let's Encrypt, or self-signed via mkcert):</p>
+<ol>
+<li>Add a <code>tls:</code> block to the Ingress for <code>harbor.dev.lan</code></li>
+<li>Change <code>externalURL</code> to <code>https://harbor.dev.lan</code> and <code>helm upgrade</code></li>
+<li>Remove <code>harbor.dev.lan</code> from <code>insecure-registries</code> on each Docker client</li>
+<li>Remove the <code>mirrors</code> entry from <code>registries.yaml</code> on each k3s node (or
+   switch its <code>endpoint</code> to <code>https://harbor.dev.lan</code>)</li>
+</ol>
+<hr />
 <h2 id="troubleshooting">Troubleshooting</h2>
 <h3 id="common-issues">Common Issues</h3>
 <ul>
@@ -1686,16 +2131,18 @@ to configure your cluster nodes. Without this configuration, pods will fail with
 <li><strong>Pull failures in K8s</strong>: Ensure pull secrets are properly configured</li>
 <li><strong>ImagePullBackOff errors</strong>: Verify nodes are configured for HTTP registry access (see <a href="../../guides/k8s-harbor-http-registry/">K8s HTTP Registry Guide</a>)</li>
 <li><strong>HTTPS client errors</strong>: Configure cluster nodes to allow HTTP connections to Harbor</li>
+<li><strong><code>docker login harbor.dev.lan</code> fails with <code>Get "https://harbor.dev.lan/v2/": ...</code></strong>: <code>harbor.dev.lan</code> is not in Docker's <code>insecure-registries</code> — see Step 5 above</li>
+<li><strong><code>docker push</code> succeeds but <code>kubectl run</code> from a pod fails to pull</strong>: a node is missing the <code>harbor.dev.lan</code> mirror in <code>/etc/rancher/k3s/registries.yaml</code> or can't resolve the hostname — see Step 4 above</li>
 </ul>
 <h3 id="quick-fixes">Quick Fixes</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Test Harbor connectivity</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>http://192.168.1.206:30002/v2/
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Check if nodes can access Harbor</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>kubectl<span class="w"> </span>describe<span class="w"> </span>pod<span class="w"> </span>&lt;failing-pod&gt;<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Verify pull secret exists</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>kubectl<span class="w"> </span>get<span class="w"> </span>secrets<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># Test Harbor connectivity</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>curl<span class="w"> </span>http://192.168.1.206:30002/v2/
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="c1"># Check if nodes can access Harbor</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>kubectl<span class="w"> </span>describe<span class="w"> </span>pod<span class="w"> </span>&lt;failing-pod&gt;<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="c1"># Verify pull secret exists</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>kubectl<span class="w"> </span>get<span class="w"> </span>secrets<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
 </code></pre></div>
 <h2 id="references">References</h2>
 <ul>
