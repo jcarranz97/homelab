@@ -4,6 +4,13 @@ This section documents all the services and applications running in my homelab.
 
 ## Core Services
 
+### Homarr Landing Page
+
+- **URL**: <http://home.dev.lan>
+- **Purpose**: Centralized homelab dashboard for accessing all applications
+- **Status**: ✅ Active
+- **Documentation**: [Homarr Setup Guide](../guides/homarr-setup.md)
+
 ### Harbor Container Registry
 
 - **URL**: <http://192.168.1.206:30002/>
@@ -51,6 +58,7 @@ Add your applications here as you deploy them
 
 | Service | Status | URL | Notes |
 |---------|--------|-----|-------|
+| Homarr Landing Page | ✅ Active | <http://home.dev.lan> | Homelab dashboard |
 | Harbor Registry | ✅ Active | <http://192.168.1.206:30002/> | Container registry |
 
 ## Adding New Services
