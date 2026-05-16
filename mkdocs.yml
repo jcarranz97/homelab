@@ -47,6 +47,7 @@ nav:
       - K8s Harbor HTTP Registry Setup: guides/k8s-harbor-http-registry.md
       - Homarr Landing Page Setup: guides/homarr-setup.md
       - Pi-hole Local DNS Setup: guides/pi-hole-setup.md
+      - Point a Linux Client at Pi-hole: guides/point-linux-client-at-pihole.md
   - Troubleshooting:
       - Common Issues: troubleshooting/common-issues.md
       - K8s Harbor HTTP Registry: troubleshooting/k8s-harbor-http-registry.md

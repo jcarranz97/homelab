@@ -30,6 +30,12 @@ flowchart LR
 
 ## Step 1: Free Port 53 on the Host
 
+!!! info "Bare-metal Pi-hole? Skip to Step 3"
+    Steps 1–2 only apply to running Pi-hole **in Docker**. If Pi-hole runs on a dedicated box
+    installed directly on the OS (Raspberry Pi OS image, or
+    `curl -sSL https://install.pi-hole.net | bash`), the installer already frees port 53 and
+    runs Pi-hole as a system service. Go straight to **Step 3** and use the bare-metal path.
+
 On Ubuntu/Debian hosts, `systemd-resolved` listens on `127.0.0.53:53` and will conflict with
 Pi-hole. Disable its stub listener:
 
@@ -114,9 +120,12 @@ Look at the `EXTERNAL-IP` column. In this homelab the Traefik service is exposed
 `192.168.1.206` and `192.168.1.208` (k3s's built-in service load balancer publishes one IP per
 node). Either IP works — pick one and use it consistently.
 
-Create `/opt/pihole/etc-dnsmasq.d/02-homelab.conf`:
+Pi-hole's web UI (**Local DNS → DNS Records**) only stores exact A records — it has **no
+wildcard support**. The wildcard must live in a `dnsmasq` custom config file. The contents are
+identical regardless of how Pi-hole is installed:
 
 ```conf
+# 02-homelab.conf
 # Wildcard: every *.dev.lan name (and any sub-subdomain like api.colony.dev.lan)
 # resolves to the Traefik ingress IP.
 address=/dev.lan/192.168.1.206
@@ -124,13 +133,42 @@ address=/dev.lan/192.168.1.206
 
 !!! tip "dnsmasq wildcards match all sub-levels"
     `address=/dev.lan/...` matches `harbor.dev.lan`, `colony.dev.lan`, AND
-    `api.colony.dev.lan`, `foo.bar.dev.lan`, etc. One line covers every internal hostname.
+    `api.colony.dev.lan`, `foo.bar.dev.lan`, etc. One line covers every internal hostname, so
+    **adding a new app never needs a Pi-hole change** — you only create its Ingress (Step 5).
 
-Reload Pi-hole's DNS:
+Where the file goes and how to reload depends on the install:
+
+**Docker install:**
 
 ```bash
+sudo tee /opt/pihole/etc-dnsmasq.d/02-homelab.conf > /dev/null <<'EOF'
+address=/dev.lan/192.168.1.206
+EOF
 sudo docker exec pihole pihole restartdns
 ```
+
+**Bare-metal install (Raspberry Pi OS / direct install):**
+
+```bash
+sudo tee /etc/dnsmasq.d/02-homelab.conf > /dev/null <<'EOF'
+address=/dev.lan/192.168.1.206
+EOF
+sudo pihole restartdns
+```
+
+!!! warning "Pi-hole v6: enable custom dnsmasq files"
+    Pi-hole v6 (the current release) **ignores `/etc/dnsmasq.d/` custom files by default**.
+    Turn the setting on once, then reload:
+
+    ```bash
+    sudo pihole-FTL --config misc.etc_dnsmasq_d true
+    sudo pihole restartdns
+    ```
+
+    The same toggle lives in the web UI under **Settings → All settings →
+    `misc.etc_dnsmasq_d`**. (Docker: set `FTLCONF_misc_etc_dnsmasq_d: 'true'` in the compose
+    `environment:` instead.) Skipping this is the most common reason the wildcard "does
+    nothing."
 
 Test from another machine on the LAN:
 
@@ -141,7 +179,11 @@ dig @<pihole-ip> harbor.dev.lan +short
 
 ## Step 4: Point the LAN at Pi-hole
 
-Tell every device on the network to use Pi-hole for DNS. The cleanest way is at the router:
+Tell devices on the network to use Pi-hole for DNS. Two ways: network-wide at the router
+(best — every device, zero per-machine config), or per-machine when the router won't let you
+change DNS.
+
+### Network-wide: router DHCP (recommended)
 
 1. Log in to the home router admin UI.
 2. Find **DHCP settings** (often under LAN or Network).
@@ -158,6 +200,45 @@ Tell every device on the network to use Pi-hole for DNS. The cleanest way is at 
       internal hostnames temporarily.
     - **Strict:** leave the secondary blank. Internal names always work, but a Pi-hole outage
       breaks DNS for the whole household until it's restored.
+
+### Per-machine: point one Linux client at Pi-hole
+
+Use this when the router's DNS field is locked (common on ISP-supplied gateways — an
+`attlocal.net` search domain is a tell-tale AT&T sign) or when only one machine should use
+Pi-hole. On modern Ubuntu/Debian desktops, **NetworkManager** owns the connection and
+**systemd-resolved** does the resolving. Set DNS on the NetworkManager connection — **not** by
+editing `/etc/resolv.conf`, which is an auto-managed symlink whose edits won't survive.
+
+```bash
+# Find the active connection name and your interface
+nmcli -t -f NAME,DEVICE connection show --active
+
+# Point that connection at Pi-hole (replace the name and the Pi-hole's static IP)
+sudo nmcli connection modify "<connection-name>" ipv4.dns "192.168.1.x"
+sudo nmcli connection modify "<connection-name>" ipv4.ignore-auto-dns yes
+sudo nmcli connection up   "<connection-name>"
+```
+
+`ipv4.ignore-auto-dns yes` stops the router from *also* injecting its own resolver, which
+would let `*.dev.lan` queries leak past Pi-hole and fail intermittently. To try it before
+committing:
+
+```bash
+# Temporary — reverts on reconnect/reboot
+sudo resolvectl dns <interface> 192.168.1.x
+```
+
+Confirm the machine is actually using Pi-hole (and nothing else):
+
+```bash
+resolvectl status        # "DNS Servers:" should list only the Pi-hole IP
+dig harbor.dev.lan +short # → 192.168.1.206
+```
+
+!!! note "IPv6"
+    If your network hands out IPv6, clients may prefer an IPv6 resolver and bypass Pi-hole.
+    Either also set `ipv6.dns` on the connection (the Pi-hole's IPv6 address) or disable IPv6
+    DNS advertisement on the router.
 
 Force a renewal on the device you're testing from, then check:
 
@@ -415,7 +496,23 @@ configuration.
 **Add another internal hostname.**
 
 Either rely on the wildcard (just create the Ingress — no DNS change needed), or add a specific
-record in `etc-dnsmasq.d/02-homelab.conf` and `pihole restartdns`.
+record to the `02-homelab.conf` from Step 3, then reload (`sudo pihole restartdns`, or
+`sudo docker exec pihole pihole restartdns` for Docker).
+
+A specific record is needed when a host must point somewhere **other than the ingress IP** —
+e.g. the Rancher management UI on its own node. dnsmasq matches the most specific entry, so a
+narrower line overrides the wildcard:
+
+```conf
+address=/dev.lan/192.168.1.206          # everything → Traefik ingress
+address=/rancher.dev.lan/192.168.1.233  # this one → Rancher's node, overrides the wildcard
+```
+
+!!! warning "Avoid the `.local` TLD"
+    Use `rancher.dev.lan`, not `rancher.local`. `.local` is reserved for mDNS/Bonjour and
+    causes intermittent resolution failures on machines running Avahi (most Linux desktops,
+    all macOS). Keeping every internal name under the single `dev.lan` suffix also means the
+    wildcard covers it by default.
 
 ## Troubleshooting
 
