@@ -13,13 +13,13 @@ step most people miss, and it silently breaks resolution even when IPv4 is set c
 `nslookup` against the default resolver fails, but querying Pi-hole directly works:
 
 ```text
-$ nslookup juan.home.lan
+$ nslookup harbor.dev.lan
 Server:    127.0.0.53
 Address:   127.0.0.53#53
-** server can't find juan.home.lan: NXDOMAIN
+** server can't find harbor.dev.lan: NXDOMAIN
 
-$ nslookup juan.home.lan 192.168.1.245     # Pi-hole, queried directly
-Name:   juan.home.lan
+$ nslookup harbor.dev.lan 192.168.1.245     # Pi-hole, queried directly
+Name:   harbor.dev.lan
 Address: 192.168.1.206
 ```
 
@@ -55,9 +55,12 @@ In this homelab the values are:
 | Connection name | `WeLoveDogs` |
 | Interface | `wlp13s0` (Wi-Fi) |
 | Pi-hole (IPv4) | `192.168.1.245` |
-| k3s ingress (records resolve to) | `192.168.1.206` |
+| Example name | `harbor.dev.lan` (a k3s app — a CNAME → `nuc-01.dev.lan`) |
+| k3s ingress (that CNAME resolves to) | `192.168.1.206` |
 
-Substitute your own connection name, interface, and Pi-hole IP throughout.
+Substitute your own connection name, interface, and Pi-hole IP throughout. The example uses
+`harbor.dev.lan`; any `*.dev.lan` name from the [Pi-hole Local DNS Setup](pi-hole-setup.md)
+works the same way (e.g. `rancher.dev.lan`, which resolves to `192.168.1.233`).
 
 ## Step 2: Point the connection at Pi-hole — IPv4
 
@@ -114,7 +117,7 @@ lookup keeps failing for the TTL even after DNS is fixed.
 
 ```bash
 resolvectl status wlp13s0      # "DNS Servers:" should list ONLY 192.168.1.245
-nslookup juan.home.lan         # now resolves via 127.0.0.53 → 192.168.1.206
+nslookup harbor.dev.lan        # now resolves via 127.0.0.53 → 192.168.1.206
 ```
 
 A correct result looks like:
@@ -126,10 +129,10 @@ Link 3 (wlp13s0)
 ```
 
 ```text
-$ nslookup juan.home.lan
+$ nslookup harbor.dev.lan
 Server:    127.0.0.53
 Address:   127.0.0.53#53
-Name:   juan.home.lan
+Name:   harbor.dev.lan
 Address: 192.168.1.206
 ```
 
@@ -169,5 +172,5 @@ resolvectl flush-caches
 
 # Verify
 resolvectl status <interface>
-nslookup <name>.home.lan
+nslookup <name>.dev.lan
 ```

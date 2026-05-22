@@ -1,11 +1,15 @@
 # Pi-hole as Local DNS for the Homelab
 
-This guide walks through running Pi-hole in Docker on an always-on server so the homelab can reach
-services by hostname (e.g. `harbor.dev.lan`, `colony.dev.lan`) instead of by IP and port.
+This guide walks through running Pi-hole on a bare-metal always-on server so the homelab can reach
+services by hostname (e.g. `harbor.dev.lan`, `rancher.dev.lan`) instead of by IP and port.
 
-Pi-hole acts as the LAN's DNS server: every device on the network asks it to resolve names, and we
-configure it with a wildcard record that points `*.dev.lan` at the k3s ingress IP. Traefik (built
-into k3s) then routes requests by hostname.
+Pi-hole acts as the LAN's DNS server: every device on the network asks it to resolve names. Pi-hole
+does **not** use a wildcard here. Instead it holds a small set of explicit records:
+
+- One **A record** per *endpoint* — the k3s ingress node (`nuc-01.dev.lan`), and any service that
+  runs on its own host (Rancher).
+- One **CNAME record** per *app* that lives behind the k3s ingress, pointing at
+  `nuc-01.dev.lan`. Traefik (built into k3s) then routes the request by hostname.
 
 As a bonus, Pi-hole filters ads and trackers at the DNS level for every device on the network.
 
@@ -13,264 +17,175 @@ As a bonus, Pi-hole filters ads and trackers at the DNS level for every device o
 
 ```mermaid
 flowchart LR
-    Client[Laptop / Phone] -->|DNS query: harbor.dev.lan| PiHole[Pi-hole<br/>always-on server]
-    PiHole -->|*.dev.lan rewrite| K3sIP[k3s node IP]
-    Client -->|HTTP request<br/>Host: harbor.dev.lan| Traefik[Traefik Ingress]
+    Client[Laptop / Phone] -->|DNS query: harbor.dev.lan| PiHole[Pi-hole<br/>192.168.1.245]
+    PiHole -->|CNAME harbor.dev.lan → nuc-01.dev.lan<br/>A nuc-01.dev.lan → 192.168.1.206| K3sIP[k3s node<br/>192.168.1.206]
+    PiHole -->|A rancher.dev.lan → 192.168.1.233| RancherNode[Rancher node<br/>192.168.1.233]
+    Client -->|HTTP request<br/>Host: harbor.dev.lan| Traefik[Traefik Ingress on k3s]
     Traefik --> Harbor[Harbor pod]
     PiHole -->|public domains| Upstream[1.1.1.1 / 9.9.9.9]
 ```
 
 ## Prerequisites
 
-- An always-on server on the LAN (separate from the k3s nodes recommended) with a static IP.
-- Docker and Docker Compose installed on that server.
+- An always-on server on the LAN (separate from the k3s nodes recommended) with a **static IP**.
+  In this homelab Pi-hole runs bare-metal at `192.168.1.245`.
 - Admin access to the home router (to change the DHCP DNS server setting).
-- A planned hostname suffix for internal services. This guide uses `dev.lan`. **Do not use
-  `.local`** — it conflicts with mDNS/Bonjour and causes intermittent resolution failures.
+- A hostname suffix for internal services. This homelab uses `dev.lan`. **Do not use `.local`**
+  — it conflicts with mDNS/Bonjour and causes intermittent resolution failures.
 
-## Step 1: Free Port 53 on the Host
+## Step 1: Install Pi-hole (Bare-Metal)
 
-!!! info "Bare-metal Pi-hole? Skip to Step 3"
-    Steps 1–2 only apply to running Pi-hole **in Docker**. If Pi-hole runs on a dedicated box
-    installed directly on the OS (Raspberry Pi OS image, or
-    `curl -sSL https://install.pi-hole.net | bash`), the installer already frees port 53 and
-    runs Pi-hole as a system service. Go straight to **Step 3** and use the bare-metal path.
-
-On Ubuntu/Debian hosts, `systemd-resolved` listens on `127.0.0.53:53` and will conflict with
-Pi-hole. Disable its stub listener:
+On a dedicated box (Raspberry Pi OS, or any Debian/Ubuntu host), run the official installer:
 
 ```bash
-sudo mkdir -p /etc/systemd/resolved.conf.d
-sudo tee /etc/systemd/resolved.conf.d/disable-stub-listener.conf > /dev/null <<'EOF'
-[Resolve]
-DNSStubListener=no
-EOF
-
-# Replace the symlinked resolv.conf so the host can still resolve names while Pi-hole boots
-sudo rm /etc/resolv.conf
-echo "nameserver 1.1.1.1" | sudo tee /etc/resolv.conf
-
-sudo systemctl restart systemd-resolved
+curl -sSL https://install.pi-hole.net | bash
 ```
 
-Verify nothing is listening on port 53:
+The installer frees port 53, installs Pi-hole as a system service, and prompts for the upstream
+resolvers (use Cloudflare `1.1.1.1` and/or Quad9 `9.9.9.9`) and a static IP. Set the admin
+password afterwards with `pihole setpassword`.
 
-```bash
-sudo ss -tulpn | grep :53
-# Expect no output
-```
+!!! info "systemd-resolved conflict"
+    On Debian/Ubuntu, `systemd-resolved` listens on `127.0.0.53:53`. The Pi-hole installer
+    detects this and offers to free the port. If it doesn't, disable the stub listener
+    manually, then re-run the installer:
 
-## Step 2: Create the Pi-hole Compose File
+    ```bash
+    sudo mkdir -p /etc/systemd/resolved.conf.d
+    sudo tee /etc/systemd/resolved.conf.d/disable-stub-listener.conf > /dev/null <<'EOF'
+    [Resolve]
+    DNSStubListener=no
+    EOF
+    sudo systemctl restart systemd-resolved
+    sudo ss -tulpn | grep :53   # expect no output before re-running the installer
+    ```
 
-Pick a directory for persistent data, e.g. `/opt/pihole`:
+!!! warning "Never expose Pi-hole as an open resolver"
+    Under **Settings → DNS → Interface settings**, choose *Allow only local requests* (or bind
+    to the LAN interface). Combined with **never port-forwarding port 53 on the router**, this
+    prevents the server from being abused in DNS amplification attacks.
 
-```bash
-sudo mkdir -p /opt/pihole/{etc-pihole,etc-dnsmasq.d}
-cd /opt/pihole
-```
+## Step 2: Add the Local DNS Records (A + CNAME)
 
-Create `docker-compose.yml`:
+This is the core of the setup. There is **no wildcard** — every hostname is an explicit record.
+The model is:
 
-```yaml
-services:
-  pihole:
-    container_name: pihole
-    image: pihole/pihole:latest
-    # Host networking is the simplest path — Pi-hole binds directly to the LAN interface,
-    # no port mapping gymnastics, and clients see the real source IP in query logs.
-    network_mode: host
-    environment:
-      TZ: 'America/Mexico_City'           # set to your timezone
-      WEBPASSWORD: 'CHANGE-ME-STRONG-PW'  # admin UI password
-      PIHOLE_DNS_: '1.1.1.1;9.9.9.9'      # upstream resolvers
-      DNSMASQ_LISTENING: 'local'          # only answer queries from the LAN
-      VIRTUAL_HOST: 'pihole.dev.lan'      # admin UI hostname
-    volumes:
-      - ./etc-pihole:/etc/pihole
-      - ./etc-dnsmasq.d:/etc/dnsmasq.d
-    cap_add:
-      - NET_ADMIN
-    restart: unless-stopped
-```
+| Type  | Domain               | Target            | Why |
+|-------|----------------------|-------------------|-----|
+| A     | `nuc-01.dev.lan`     | `192.168.1.206`   | The k3s node where the Traefik ingress listens. |
+| CNAME | `harbor.dev.lan`     | `nuc-01.dev.lan`  | Harbor — lives behind the k3s ingress. |
+| CNAME | `fast-api.dev.lan`   | `nuc-01.dev.lan`  | fast-api example app — behind the k3s ingress. |
+| CNAME | `colony.dev.lan`     | `nuc-01.dev.lan`  | colony frontend — behind the k3s ingress. |
+| CNAME | `api.colony.dev.lan` | `nuc-01.dev.lan`  | colony backend — behind the k3s ingress. |
+| A     | `rancher.dev.lan`    | `192.168.1.233`   | Rancher management UI — its **own node**, *not* behind the k3s ingress. |
 
-!!! warning "Bind to the LAN interface only"
-    `DNSMASQ_LISTENING: local` tells Pi-hole to refuse queries that arrive from outside its
-    subnet. Combined with **never port-forwarding port 53 on the router**, this prevents the
-    server from being abused as an open resolver in DNS amplification attacks.
+!!! tip "Why CNAMEs instead of one A record per app"
+    Every app behind the k3s ingress shares the same IP. Pointing each one at
+    `nuc-01.dev.lan` via a CNAME means the ingress IP is written down **once**. If the ingress
+    moves (e.g. you switch to a MetalLB floating IP), you change the single `nuc-01.dev.lan` A
+    record and every app follows automatically.
 
-Bring it up:
+    Rancher is the exception: it is a separate Rancher install on its own node, so it gets a
+    **direct A record** to `192.168.1.233`. A CNAME to `nuc-01.dev.lan` would point it at the
+    wrong cluster entirely.
 
-```bash
-sudo docker compose up -d
-sudo docker compose logs -f pihole   # watch the first boot
-```
-
-## Step 3: Add the Wildcard DNS Record
-
-This is the rule that makes `harbor.dev.lan`, `colony.dev.lan`, and any other `*.dev.lan` host
-resolve to the k3s ingress IP.
-
-First, find the IP that Traefik is listening on:
+First, confirm the k3s ingress IP:
 
 ```bash
 kubectl get svc -n kube-system traefik
 ```
 
-Look at the `EXTERNAL-IP` column. In this homelab the Traefik service is exposed at
-`192.168.1.206` and `192.168.1.208` (k3s's built-in service load balancer publishes one IP per
-node). Either IP works — pick one and use it consistently.
+The `EXTERNAL-IP` column shows the Traefik service IP — `192.168.1.206` in this homelab (k3s's
+built-in service load balancer publishes one IP per node; pick one and use it consistently).
 
-Pi-hole's web UI (**Local DNS → DNS Records**) only stores exact A records — it has **no
-wildcard support**. The wildcard must live in a `dnsmasq` custom config file. The contents are
-identical regardless of how Pi-hole is installed:
+### Add the records in the Pi-hole web UI (recommended)
 
-```conf
-# 02-homelab.conf
-# Wildcard: every *.dev.lan name (and any sub-subdomain like api.colony.dev.lan)
-# resolves to the Traefik ingress IP.
-address=/dev.lan/192.168.1.206
-```
+The web UI works the same on Pi-hole v5 and v6 and is the canonical way to manage these records.
 
-!!! tip "dnsmasq wildcards match all sub-levels"
-    `address=/dev.lan/...` matches `harbor.dev.lan`, `colony.dev.lan`, AND
-    `api.colony.dev.lan`, `foo.bar.dev.lan`, etc. One line covers every internal hostname, so
-    **adding a new app never needs a Pi-hole change** — you only create its Ingress (Step 5).
+1. **Local DNS → DNS Records** — add the **A records**:
+    - Domain `nuc-01.dev.lan`, IP `192.168.1.206`
+    - Domain `rancher.dev.lan`, IP `192.168.1.233`
+2. **Local DNS → CNAME Records** — add one **CNAME** per app, all targeting `nuc-01.dev.lan`:
+    - `harbor.dev.lan` → `nuc-01.dev.lan`
+    - `fast-api.dev.lan` → `nuc-01.dev.lan`
+    - `colony.dev.lan` → `nuc-01.dev.lan`
+    - `api.colony.dev.lan` → `nuc-01.dev.lan`
 
-Where the file goes and how to reload depends on the install:
+!!! warning "Add the A record before the CNAME"
+    Pi-hole only resolves a CNAME if its target is itself resolvable **by Pi-hole**. Create the
+    `nuc-01.dev.lan` A record first, otherwise the app CNAMEs return nothing.
 
-**Docker install:**
+### CLI reference (optional)
 
-```bash
-sudo tee /opt/pihole/etc-dnsmasq.d/02-homelab.conf > /dev/null <<'EOF'
-address=/dev.lan/192.168.1.206
-EOF
-sudo docker exec pihole pihole restartdns
-```
+Where these live on a bare-metal install depends on the Pi-hole version:
 
-**Bare-metal install (Raspberry Pi OS / direct install):**
+- **Pi-hole v5** — A records in `/etc/pihole/custom.list`
+  (`192.168.1.206 nuc-01.dev.lan`), CNAMEs in
+  `/etc/dnsmasq.d/05-pihole-custom-cname.conf` (`cname=harbor.dev.lan,nuc-01.dev.lan`).
+  Reload with `sudo pihole restartdns`.
+- **Pi-hole v6** — both live in `/etc/pihole/pihole.toml` under `dns.hosts` and
+  `dns.cnameRecords`. The CLI (`pihole-FTL --config …`) **replaces the entire array**, so use
+  the web UI to avoid clobbering existing records.
 
-```bash
-sudo tee /etc/dnsmasq.d/02-homelab.conf > /dev/null <<'EOF'
-address=/dev.lan/192.168.1.206
-EOF
-sudo pihole restartdns
-```
+### Verify
 
-!!! warning "Pi-hole v6: enable custom dnsmasq files"
-    Pi-hole v6 (the current release) **ignores `/etc/dnsmasq.d/` custom files by default**.
-    Turn the setting on once, then reload:
-
-    ```bash
-    sudo pihole-FTL --config misc.etc_dnsmasq_d true
-    sudo pihole restartdns
-    ```
-
-    The same toggle lives in the web UI under **Settings → All settings →
-    `misc.etc_dnsmasq_d`**. (Docker: set `FTLCONF_misc_etc_dnsmasq_d: 'true'` in the compose
-    `environment:` instead.) Skipping this is the most common reason the wildcard "does
-    nothing."
-
-Test from another machine on the LAN:
+Query Pi-hole directly so you're testing Pi-hole and not a client's cache:
 
 ```bash
-dig @<pihole-ip> harbor.dev.lan +short
-# Expect: 192.168.1.206
+dig @192.168.1.245 nuc-01.dev.lan   +short   # → 192.168.1.206
+dig @192.168.1.245 harbor.dev.lan   +short   # → 192.168.1.206  (resolved via the CNAME)
+dig @192.168.1.245 rancher.dev.lan  +short   # → 192.168.1.233
 ```
 
-## Step 4: Point the LAN at Pi-hole
+## Step 3: Point the LAN at Pi-hole
 
-Tell devices on the network to use Pi-hole for DNS. Two ways: network-wide at the router
-(best — every device, zero per-machine config), or per-machine when the router won't let you
-change DNS.
+Tell devices on the network to use Pi-hole (`192.168.1.245`) for DNS. Two ways: network-wide at
+the router (best — every device, zero per-machine config), or per-machine when the router won't
+let you change DNS.
 
 ### Network-wide: router DHCP (recommended)
 
 1. Log in to the home router admin UI.
 2. Find **DHCP settings** (often under LAN or Network).
-3. Set **Primary DNS** to the Pi-hole server's static IP.
-4. Set **Secondary DNS** to a public resolver (`1.1.1.1` or `9.9.9.9`) — see the trade-off note
-   below.
+3. Set **Primary DNS** to `192.168.1.245` (the Pi-hole).
+4. Set **Secondary DNS** to a public resolver (`1.1.1.1` or `9.9.9.9`) — see the trade-off note.
 5. Save and either restart the router or wait for DHCP leases to renew (usually under an hour).
 
 !!! note "Secondary DNS trade-off"
     A public secondary keeps the internet working when Pi-hole is down, but clients will
-    silently fall back and `*.dev.lan` won't resolve. Two options:
+    silently fall back and `*.dev.lan` names won't resolve. Two options:
 
-    - **Pragmatic:** keep the public secondary. Accept that Pi-hole going down breaks the
-      internal hostnames temporarily.
+    - **Pragmatic:** keep the public secondary. Accept that a Pi-hole outage temporarily breaks
+      internal hostnames.
     - **Strict:** leave the secondary blank. Internal names always work, but a Pi-hole outage
       breaks DNS for the whole household until it's restored.
 
-### Per-machine: point one Linux client at Pi-hole
+### Per-machine: one Linux client
 
-Use this when the router's DNS field is locked (common on ISP-supplied gateways — an
-`attlocal.net` search domain is a tell-tale AT&T sign) or when only one machine should use
-Pi-hole. On modern Ubuntu/Debian desktops, **NetworkManager** owns the connection and
-**systemd-resolved** does the resolving. Set DNS on the NetworkManager connection — **not** by
-editing `/etc/resolv.conf`, which is an auto-managed symlink whose edits won't survive.
+When the router's DNS field is locked (common on ISP gateways) or only one machine should use
+Pi-hole, point that machine at `192.168.1.245` directly. See the dedicated
+[Point a Linux Client at Pi-hole](point-linux-client-at-pihole.md) guide for the full
+NetworkManager/systemd-resolved walkthrough.
 
-```bash
-# Find the active connection name and your interface
-nmcli -t -f NAME,DEVICE connection show --active
+## Step 4: Expose a k8s Application via Ingress
 
-# Point that connection at Pi-hole (replace the name and the Pi-hole's static IP)
-sudo nmcli connection modify "<connection-name>" ipv4.dns "192.168.1.x"
-sudo nmcli connection modify "<connection-name>" ipv4.ignore-auto-dns yes
-sudo nmcli connection up   "<connection-name>"
-```
-
-`ipv4.ignore-auto-dns yes` stops the router from *also* injecting its own resolver, which
-would let `*.dev.lan` queries leak past Pi-hole and fail intermittently. To try it before
-committing:
-
-```bash
-# Temporary — reverts on reconnect/reboot
-sudo resolvectl dns <interface> 192.168.1.x
-```
-
-Confirm the machine is actually using Pi-hole (and nothing else):
-
-```bash
-resolvectl status        # "DNS Servers:" should list only the Pi-hole IP
-dig harbor.dev.lan +short # → 192.168.1.206
-```
-
-!!! note "IPv6"
-    If your network hands out IPv6, clients may prefer an IPv6 resolver and bypass Pi-hole.
-    Either also set `ipv6.dns` on the connection (the Pi-hole's IPv6 address) or disable IPv6
-    DNS advertisement on the router.
-
-Force a renewal on the device you're testing from, then check:
-
-```bash
-# macOS
-scutil --dns | grep nameserver
-
-# Linux
-resolvectl status
-
-nslookup harbor.dev.lan
-```
-
-## Step 5: Expose a k8s Application via Ingress
-
-With DNS in place, the last piece is an `Ingress` resource per application that maps a hostname
-to a Service inside the cluster. Traefik (built into k3s) reads these and starts routing.
+For an app running in the k3s cluster, two things are needed: a Kubernetes `Ingress` mapping the
+hostname to a Service, and a Pi-hole **CNAME** so the hostname resolves.
 
 The general pattern:
 
-1. Identify the Service name, namespace, and port you want to expose.
-2. Choose a hostname under your wildcard suffix (e.g. `<app>.dev.lan`).
-3. Apply an Ingress that routes that hostname to the Service.
-4. Browse to `http://<app>.dev.lan`.
+1. Identify the Service name, namespace, and port to expose.
+2. Choose a hostname under `dev.lan` (e.g. `<app>.dev.lan`).
+3. Add a Pi-hole CNAME `<app>.dev.lan → nuc-01.dev.lan` (Local DNS → CNAME Records).
+4. Apply an Ingress routing that hostname to the Service.
+5. Browse to `http://<app>.dev.lan`.
 
 The two examples below show this pattern at two levels of complexity: a single-service API, then
 a frontend + backend application.
 
 ### Simple Example: `fast-api-docker` in `test-namespace`
 
-This is the smallest possible case — one Deployment, one Service, one hostname. Inspect what's
-running:
+The smallest possible case — one Deployment, one Service, one hostname. Inspect what's running:
 
 ```bash
 kubectl get svc -n test-namespace
@@ -282,11 +197,10 @@ fast-api-docker-service   NodePort   10.43.56.94   80:30470/TCP
 ```
 
 The Service listens on port **80** internally (the `80:30470` means "container port 80, exposed
-as NodePort 30470"). The Ingress will target port 80, the NodePort becomes irrelevant once the
+as NodePort 30470"). The Ingress targets port 80; the NodePort becomes irrelevant once the
 hostname is in place.
 
-**Pick a hostname** — `fast-api.dev.lan` is descriptive and already covered by the `*.dev.lan`
-wildcard, so no Pi-hole changes are needed.
+**DNS:** add a CNAME `fast-api.dev.lan → nuc-01.dev.lan` in **Local DNS → CNAME Records**.
 
 **Create the Ingress** as `fast-api-ingress.yaml`:
 
@@ -360,9 +274,8 @@ this step you'll reach them by name instead.
 | Subdomain (recommended) | `colony.dev.lan` | `api.colony.dev.lan` | Cleanest. Frontend and backend are independently routed; no path-rewrite headaches; CORS stays simple. |
 | Path-based | `colony.dev.lan/` | `colony.dev.lan/api` | Single hostname, but you'll likely need path stripping middleware so the backend doesn't see `/api` in its routes. |
 
-This guide uses the subdomain pattern. Both hostnames are covered by the existing `*.dev.lan`
-wildcard, so **no Pi-hole changes are needed when adding new apps** — you only edit Pi-hole when
-you add a brand-new TLD or want a record outside the wildcard.
+This guide uses the subdomain pattern, so add **two** CNAMEs in Pi-hole, both
+→ `nuc-01.dev.lan`: `colony.dev.lan` and `api.colony.dev.lan`.
 
 **Create the Ingress manifest.** Save as `colony-dev-ingress.yaml`:
 
@@ -427,11 +340,11 @@ kubectl get ingress -n colony-dev
 # colony-dev-backend    traefik   api.colony.dev.lan      192.168.1.206,192.168.1.208       80
 ```
 
-From a LAN client (the Pi-hole change must already be live):
+From a LAN client (the Pi-hole CNAMEs must already be live):
 
 ```bash
-dig colony.dev.lan +short          # → 192.168.1.206
-dig api.colony.dev.lan +short      # → 192.168.1.206
+dig colony.dev.lan +short          # → 192.168.1.206  (via CNAME → nuc-01.dev.lan)
+dig api.colony.dev.lan +short      # → 192.168.1.206  (via CNAME → nuc-01.dev.lan)
 curl -I http://colony.dev.lan      # → HTTP 200 from the frontend
 curl -I http://api.colony.dev.lan  # → HTTP 200/404 from the backend (depends on root route)
 ```
@@ -443,6 +356,9 @@ base URL to `http://api.colony.dev.lan` (whatever env var or config drives that 
 ### Adding More Apps
 
 Repeat the pattern. To expose Harbor, for example:
+
+1. Add a Pi-hole CNAME `harbor.dev.lan → nuc-01.dev.lan` (Local DNS → CNAME Records).
+2. Apply the Ingress:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -465,14 +381,34 @@ spec:
                   number: 80
 ```
 
-No Pi-hole changes needed — the wildcard already covers `harbor.dev.lan`.
+Every new k3s app is exactly this: **one CNAME → `nuc-01.dev.lan`** plus its Ingress. You never
+touch the A record.
+
+## Step 5: Services on Their Own Node (Rancher)
+
+Not everything sits behind the k3s ingress. The Rancher management UI is a separate Rancher
+install on its own node at `192.168.1.233`. It must **not** be a CNAME to `nuc-01.dev.lan` —
+that would route it into the wrong cluster.
+
+Instead it is a **direct A record**:
+
+- **Local DNS → DNS Records:** `rancher.dev.lan` → `192.168.1.233`
+
+```bash
+dig @192.168.1.245 rancher.dev.lan +short   # → 192.168.1.233
+```
+
+The full Rancher install and the "change the Rancher hostname" procedure (Helm upgrade,
+regenerating the self-signed TLS cert, updating `server-url`) live in the
+[Rancher Setup guide](rancher-setup.md). Any future service that runs on its own host follows
+this same pattern: a direct A record to that host's IP, not a CNAME.
 
 ## Security Hardening
 
 | Risk | Mitigation |
 |------|------------|
-| Open resolver abuse (DNS amplification) | `DNSMASQ_LISTENING: local` set above. **Never** port-forward `53/tcp` or `53/udp` on the router. |
-| Admin UI compromise | Strong `WEBPASSWORD`; access only over LAN. Do not expose `/admin` externally. |
+| Open resolver abuse (DNS amplification) | **Settings → DNS → Interface settings** set to *Allow only local requests* (or bind to the LAN interface). **Never** port-forward `53/tcp` or `53/udp` on the router. |
+| Admin UI compromise | Strong admin password (`pihole setpassword`); access only over LAN. Do not expose `/admin` externally. |
 | Query log privacy | Pi-hole logs every DNS query by default. Reduce retention in **Settings → Privacy**, or set the privacy level to "Anonymous logging" if other people share the network. |
 | Single point of failure | Public secondary DNS at the router (covered above), or run a second Pi-hole and sync with [gravity-sync](https://github.com/vmstan/gravity-sync). |
 | Stale upstream / poisoning | Use trustworthy upstreams (Cloudflare `1.1.1.1`, Quad9 `9.9.9.9`); enable DNSSEC under **Settings → DNS** if upstreams support it. |
@@ -482,55 +418,55 @@ No Pi-hole changes needed — the wildcard already covers `harbor.dev.lan`.
 **Update Pi-hole:**
 
 ```bash
-cd /opt/pihole
-sudo docker compose pull
-sudo docker compose up -d
+sudo pihole -up
 ```
 
-**Back up settings.**
+**Back up settings.** Everything is on the Pi-hole host:
 
-The `etc-pihole/` and `etc-dnsmasq.d/` directories contain everything. A periodic copy to a
-different host (or to a backup folder on the k3s cluster) is enough to restore the full
-configuration.
+- **v5:** `/etc/pihole/` (including `custom.list`) and `/etc/dnsmasq.d/`.
+- **v6:** `/etc/pihole/` (including `pihole.toml`).
 
-**Add another internal hostname.**
+A periodic copy to a different host (or a backup folder on the k3s cluster) is enough to restore
+the full configuration. The web UI also has **Settings → Teleporter** for a one-click export.
 
-Either rely on the wildcard (just create the Ingress — no DNS change needed), or add a specific
-record to the `02-homelab.conf` from Step 3, then reload (`sudo pihole restartdns`, or
-`sudo docker exec pihole pihole restartdns` for Docker).
+**Add another internal hostname.** Decide where the service actually lives:
 
-A specific record is needed when a host must point somewhere **other than the ingress IP** —
-e.g. the Rancher management UI on its own node. dnsmasq matches the most specific entry, so a
-narrower line overrides the wildcard:
-
-```conf
-address=/dev.lan/192.168.1.206          # everything → Traefik ingress
-address=/rancher.dev.lan/192.168.1.233  # this one → Rancher's node, overrides the wildcard
-```
+- **Behind the k3s ingress** → add a **CNAME** `<app>.dev.lan → nuc-01.dev.lan`
+  (Local DNS → CNAME Records). This is the common case.
+- **On its own host** (like Rancher) → add an **A record** `<name>.dev.lan → <that host's IP>`
+  (Local DNS → DNS Records).
 
 !!! warning "Avoid the `.local` TLD"
     Use `rancher.dev.lan`, not `rancher.local`. `.local` is reserved for mDNS/Bonjour and
     causes intermittent resolution failures on machines running Avahi (most Linux desktops,
-    all macOS). Keeping every internal name under the single `dev.lan` suffix also means the
-    wildcard covers it by default.
+    all macOS). Keep every internal name under the single `dev.lan` suffix.
 
 ## Troubleshooting
 
-**`docker compose up` fails with "address already in use" on port 53.**
-`systemd-resolved` is still bound. Re-run Step 1 and verify with `sudo ss -tulpn | grep :53`.
+**A `*.dev.lan` name returns NXDOMAIN / nothing.**
+First isolate where it breaks:
 
-**Clients still resolve `harbor.dev.lan` to NXDOMAIN.**
-The device is using cached DNS or a different resolver. Renew the DHCP lease, then check
-`resolvectl status` (Linux) or `scutil --dns` (macOS) to confirm the device is actually using
-Pi-hole.
+```bash
+dig @192.168.1.245 <name>.dev.lan +short   # ask Pi-hole directly
+dig <name>.dev.lan +short                  # ask via the client's normal resolver
+```
+
+- Both fail → the record is missing or wrong in Pi-hole. For an app CNAME, also confirm the
+  `nuc-01.dev.lan` A record exists (a CNAME whose target Pi-hole can't resolve returns nothing).
+- Direct query works but the normal one doesn't → the client isn't using Pi-hole. Check
+  `resolvectl status` (Linux) / `scutil --dns` (macOS) and renew the DHCP lease.
 
 **Pi-hole resolves the name but the browser shows a Traefik 404.**
 DNS is working; the Ingress is wrong. Check `kubectl get ingress -A` and confirm the `host:`
 field matches exactly, and that the backing Service exists in the same namespace.
 
+**`rancher.dev.lan` resolves to `192.168.1.206` instead of `192.168.1.233`.**
+It was added as a CNAME to `nuc-01.dev.lan` by mistake. Delete the CNAME and add it as a direct
+**A record** to `192.168.1.233` (Local DNS → DNS Records).
+
 **Pi-hole admin UI is unreachable.**
-With host networking the UI is on `http://<pihole-ip>/admin`, port 80. Confirm nothing else on
-the host is using port 80, and check `docker logs pihole`.
+The UI is at `http://192.168.1.245/admin`. Confirm the Pi-hole service is up
+(`systemctl status pihole-FTL`) and that nothing else on the host is using port 80.
 
 ## Next Steps
 
@@ -540,5 +476,6 @@ the host is using port 80, and check `docker logs pihole`.
   just add a `tls:` block referencing a Secret that cert-manager populates.
 - **Single ingress IP.** k3s's built-in service load balancer publishes Traefik on every node IP
   (here `192.168.1.206` and `192.168.1.208`). If you want a single floating IP that survives a
-  node going offline, swap servicelb for [MetalLB](https://metallb.universe.tf/) in
-  `L2` mode and update the Pi-hole wildcard to point at that IP.
+  node going offline, swap servicelb for [MetalLB](https://metallb.universe.tf/) in `L2` mode.
+  With the CNAME model you only update the **one** `nuc-01.dev.lan` A record — every app CNAME
+  follows automatically, no per-app changes.
