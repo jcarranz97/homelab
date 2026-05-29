@@ -11,10 +11,10 @@
       
       
       
-        <link rel="prev" href="../../services/monitoring/">
+        <link rel="prev" href="../hermes-k8s-deployment/">
       
       
-        <link rel="next" href="../k8s-cluster-setup/">
+        <link rel="next" href="../k8s-harbor-http-registry/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Getting Started - Homelab</title>
+        <title>Borra Bot Journal on k3s - Homelab</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getting-started" class="md-skip">
+        <a href="#deploying-the-borra-bot-journal-to-k3s" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Getting Started
+              Borra Bot Journal on k3s
             
           </span>
         </div>
@@ -289,7 +289,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+        <a href="../getting-started/" class="md-tabs__link">
           
   
   
@@ -786,37 +786,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Getting Started
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
         
   
   
@@ -832,164 +805,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#what-is-a-homelab" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What is a Homelab?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#my-homelab-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        My Homelab Setup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#documentation-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Documentation Structure
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Documentation Structure">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#infrastructure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📋 Infrastructure
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#services" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ⚙️ Services
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#guides-how-tos" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📚 Guides &amp; How-tos
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🔧 Troubleshooting
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📖 Reference
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-to-use-this-documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How to Use This Documentation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prerequisites
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contributing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Contributing
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next Steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1111,10 +926,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../borra-bot-journal-deployment/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Borra Bot Journal on k3s
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1130,6 +972,236 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#one-time-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One-time setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="One-time setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-add-the-hostname-to-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Add the hostname to DNS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-the-namespace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Create the namespace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-create-the-harbor-pull-secret" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Create the Harbor pull secret
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-first-deploy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. First deploy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#daily-deployment-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Daily deployment flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-deploy-script-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the deploy script does
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rollback
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manual-ops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual ops
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#imagepullbackoff-on-first-deploy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ImagePullBackOff on first deploy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cron-runs-but-borra-botdevlan-shows-stale-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cron runs but borra-bot.dev.lan shows stale content
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-fails-with-mkdocs-command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build fails with mkdocs: command not found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#git-pull-fails-auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        git pull fails (auth)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tear-down" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tear-down
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1681,91 +1753,205 @@
   
 
 
-<h1 id="getting-started">Getting Started</h1>
-<p>Welcome to my homelab! This guide will help you understand how to navigate and use this documentation.</p>
-<h2 id="what-is-a-homelab">What is a Homelab?</h2>
-<p>A homelab is a personal testing environment where you can:</p>
+<h1 id="deploying-the-borra-bot-journal-to-k3s">Deploying the Borra Bot Journal to k3s</h1>
+<p>A static MkDocs site that publishes Borra Bot's daily journal. Built daily on
+the host where the bot runs and served from k3s behind Traefik at
+<code>http://borra-bot.dev.lan</code>.</p>
+<h2 id="architecture">Architecture</h2>
+<pre class="mermaid"><code>flowchart LR
+    A[borra-bot host] --&gt;|nightly cron| B[mkdocs build]
+    B --&gt; C[docker build]
+    C --&gt;|push| D[(Harbor&lt;br/&gt;harbor.dev.lan)]
+    C --&gt;|rollout restart| E[k3s Deployment]
+    E --&gt;|pulls :latest| D
+    F[Traefik Ingress] --&gt;|borra-bot.dev.lan| E</code></pre>
 <ul>
-<li>Learn new technologies safely</li>
-<li>Test configurations before production</li>
-<li>Self-host applications and services</li>
-<li>Practice system administration skills</li>
+<li><strong>Build:</strong> runs on the host (not in-cluster) so MkDocs has access to git
+  history for the <code>git-revision-date-localized</code> plugin timestamps.</li>
+<li><strong>Image:</strong> <code>nginxinc/nginx-unprivileged:1.27-alpine</code> serving pre-built
+  static HTML on port 8080. Image fits the <code>restricted</code> Pod Security Standard
+  out of the box.</li>
+<li><strong>Tagging:</strong> every build pushes two tags — <code>:YYYY-MM-DD</code> (immutable,
+  rollback target) and <code>:latest</code> (what the Deployment pulls).</li>
 </ul>
-<h2 id="my-homelab-setup">My Homelab Setup</h2>
-<p>My homelab is centered around a Kubernetes cluster that runs various services and applications. The main components include:</p>
-<ul>
-<li><strong>Kubernetes Cluster</strong>: Container orchestration platform</li>
-<li><strong>Harbor Registry</strong>: Private container image registry</li>
-<li><strong>Persistent Storage</strong>: For stateful applications</li>
-<li><strong>Networking</strong>: Service mesh and ingress controllers</li>
-</ul>
-<h2 id="documentation-structure">Documentation Structure</h2>
-<p>This documentation is organized into several sections:</p>
-<h3 id="infrastructure">📋 Infrastructure</h3>
-<p>Describes the physical and logical infrastructure:</p>
-<ul>
-<li>Hardware specifications</li>
-<li>Network topology</li>
-<li>Kubernetes cluster configuration</li>
-</ul>
-<h3 id="services">⚙️ Services</h3>
-<p>Documents all running services:</p>
-<ul>
-<li>Service descriptions and access information</li>
-<li>Configuration details</li>
-<li>Integration points</li>
-</ul>
-<h3 id="guides-how-tos">📚 Guides &amp; How-tos</h3>
-<p>Step-by-step tutorials for:</p>
-<ul>
-<li>Deploying applications</li>
-<li>Configuring services</li>
-<li>Troubleshooting common issues</li>
-</ul>
-<h3 id="troubleshooting">🔧 Troubleshooting</h3>
-<p>Common problems and their solutions</p>
-<h3 id="reference">📖 Reference</h3>
-<p>Quick reference materials:</p>
-<ul>
-<li>Configuration files</li>
-<li>Useful commands</li>
-<li>External resources</li>
-</ul>
-<h2 id="how-to-use-this-documentation">How to Use This Documentation</h2>
-<ol>
-<li>
-<p><strong>New to homelabs?</strong> Start with the <a href="../../infrastructure/hardware/">Hardware Overview</a> to understand the setup</p>
-</li>
-<li>
-<p><strong>Setting up your own homelab?</strong> Follow the <a href="../k8s-cluster-setup/">K8s Cluster Setup Guide</a> for step-by-step instructions</p>
-</li>
-<li>
-<p><strong>Want to deploy something?</strong> Check the <a href="../harbor-k8s-deployment/">Guides &amp; How-tos</a> section for detailed tutorials</p>
-</li>
-<li>
-<p><strong>Looking for a specific service?</strong> Visit the <a href="../../services/overview/">Services</a> section</p>
-</li>
-<li>
-<p><strong>Having issues?</strong> Check <a href="../../troubleshooting/common-issues/">Troubleshooting</a> for solutions</p>
-</li>
-</ol>
 <h2 id="prerequisites">Prerequisites</h2>
-<p>To follow along with the guides in this documentation, you should have:</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cluster</td>
+<td>k3s (with default Traefik ingress)</td>
+</tr>
+<tr>
+<td>Registry</td>
+<td>Harbor (<code>harbor.dev.lan</code> and <code>192.168.1.206:30002</code>)</td>
+</tr>
+<tr>
+<td>Host running the bot</td>
+<td>Has <code>docker</code>, <code>kubectl</code>, and <code>uv</code> installed and authenticated to the cluster + Harbor</td>
+</tr>
+<tr>
+<td>Source repo</td>
+<td><code>https://github.com/jcarranz97/borra-bot</code> cloned on the host, on the branch the cron should track</td>
+</tr>
+<tr>
+<td>DNS</td>
+<td><code>borra-bot.dev.lan</code> resolves to a k3s node (Pi-hole entry or <code>/etc/hosts</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="one-time-setup">One-time setup</h2>
+<h3 id="1-add-the-hostname-to-dns">1. Add the hostname to DNS</h3>
+<p>Either add a Pi-hole local record for <code>borra-bot.dev.lan</code> pointing at a node
+IP (<code>192.168.1.206</code> for the worker, <code>192.168.1.208</code> for the control plane),
+<strong>or</strong> add a hosts entry on each machine that needs to reach the site:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>192.168.1.206  borra-bot.dev.lan
+</code></pre></div>
+<h3 id="2-create-the-namespace">2. Create the namespace</h3>
+<p>The deploy script applies this automatically, but it's listed here for
+reference (<code>borra-bot/k8s/namespace.yaml</code>):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Namespace</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nt">metadata</span><span class="p">:</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">borra-bot-journal</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nt">pod-security.kubernetes.io/enforce</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">restricted</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nt">pod-security.kubernetes.io/enforce-version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">latest</span>
+</code></pre></div>
+<h3 id="3-create-the-harbor-pull-secret">3. Create the Harbor pull secret</h3>
+<p>The Deployment references <code>imagePullSecrets: [{name: harbor-secret}]</code>. Create
+it once in the namespace:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>borra-bot-journal<span class="w">  </span><span class="c1"># if not already created</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>kubectl<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>docker-registry<span class="w"> </span>harbor-secret<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span>--docker-server<span class="o">=</span>harbor.dev.lan<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span>--docker-username<span class="o">=</span>&lt;your-harbor-user&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span>--docker-password<span class="o">=</span>&lt;your-harbor-password&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span>--namespace<span class="o">=</span>borra-bot-journal
+</code></pre></div>
+<h3 id="4-first-deploy">4. First deploy</h3>
+<p>Run the deploy script manually for the first time — it builds, pushes, and
+applies everything:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">cd</span><span class="w"> </span>/path/to/borra-bot
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>./scripts/deploy-journal.sh
+</code></pre></div>
+<p>After it finishes, verify:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>borra-bot-journal
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="c1"># NAME                                 READY   STATUS    RESTARTS   AGE</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># borra-bot-journal-xxxxxxx-yyyyy      1/1     Running   0          30s</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>curl<span class="w"> </span>-I<span class="w"> </span>http://borra-bot.dev.lan
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="c1"># HTTP/1.1 200 OK</span>
+</code></pre></div>
+<p>Open <code>http://borra-bot.dev.lan</code> in a browser — you should see the journal
+landing page.</p>
+<h2 id="daily-deployment-flow">Daily deployment flow</h2>
+<p>Once everything works manually, schedule the deploy script via cron on the
+host where the bot runs. The bot's auto-learn job writes the day's journal
+at 23:00 UTC and pushes it to GitHub immediately after; pick a deploy time
+that gives that push room to land.</p>
+<p>Edit the bot user's crontab:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>crontab<span class="w"> </span>-e
+</code></pre></div>
+<p>Add:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a># Borra Bot Journal — daily build &amp; deploy
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>30 0 * * *  /home/homelab/borra-bot/scripts/deploy-journal.sh &gt;&gt; /var/log/borra-bot-journal-deploy.log 2&gt;&amp;1
+</code></pre></div>
+<p>(Adjust the path to where <code>borra-bot</code> is cloned on the host.) That fires at
+00:30 UTC daily — ~1.5 hours after auto-learn finishes.</p>
+<p>If <code>/var/log/</code> is not writable by the cron user, put the log somewhere the
+user owns, e.g. <code>~/borra-bot-journal-deploy.log</code>.</p>
+<h2 id="what-the-deploy-script-does">What the deploy script does</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>git<span class="w"> </span>pull<span class="w"> </span>--ff-only<span class="w">                           </span><span class="c1"># latest journal entries</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>uv<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>build<span class="w">                          </span><span class="c1"># produces ./site</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>harbor.dev.lan/library/borra-bot-journal:YYYY-MM-DD<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">             </span>-t<span class="w"> </span>harbor.dev.lan/library/borra-bot-journal:latest<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">             </span>-f<span class="w"> </span>docker/Dockerfile<span class="w"> </span>.
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>docker<span class="w"> </span>push<span class="w"> </span>...:YYYY-MM-DD
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>docker<span class="w"> </span>push<span class="w"> </span>...:latest
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>k8s/<span class="w">                        </span><span class="c1"># idempotent</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>kubectl<span class="w"> </span>rollout<span class="w"> </span>restart<span class="w"> </span>deployment/borra-bot-journal<span class="w"> </span>-n<span class="w"> </span>borra-bot-journal
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>kubectl<span class="w"> </span>rollout<span class="w"> </span>status<span class="w">  </span>deployment/borra-bot-journal<span class="w"> </span>-n<span class="w"> </span>borra-bot-journal<span class="w"> </span>--timeout<span class="o">=</span>120s
+</code></pre></div>
+<p>The <code>:latest</code> tag is what the Deployment pulls (with
+<code>imagePullPolicy: Always</code>); the <code>:YYYY-MM-DD</code> tag is the immutable rollback
+target.</p>
+<h2 id="rollback">Rollback</h2>
+<p>To restore yesterday's site:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>kubectl<span class="w"> </span><span class="nb">set</span><span class="w"> </span>image<span class="w"> </span>deployment/borra-bot-journal<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nv">nginx</span><span class="o">=</span>harbor.dev.lan/library/borra-bot-journal:2026-05-27<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span>-n<span class="w"> </span>borra-bot-journal
+</code></pre></div>
+<p>(Substitute the date you want.) <code>kubectl rollout undo</code> also works for the
+single previous version.</p>
+<h2 id="manual-ops">Manual ops</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># What&#39;s running</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>kubectl<span class="w"> </span>get<span class="w"> </span>all<span class="w"> </span>-n<span class="w"> </span>borra-bot-journal
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Pod logs (nginx access + error)</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>kubectl<span class="w"> </span>logs<span class="w"> </span>-n<span class="w"> </span>borra-bot-journal<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>borra-bot-journal<span class="w"> </span>-f
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># Force a rebuild + redeploy outside the cron window</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>/home/homelab/borra-bot/scripts/deploy-journal.sh
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="c1"># Check that the ingress is wired up</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"> </span>-n<span class="w"> </span>borra-bot-journal
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="c1"># NAME                CLASS     HOSTS                ADDRESS                       PORTS</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="c1"># borra-bot-journal   traefik   borra-bot.dev.lan    192.168.1.206,192.168.1.208   80</span>
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="imagepullbackoff-on-first-deploy"><code>ImagePullBackOff</code> on first deploy</h3>
+<p>Two common causes:</p>
+<ol>
+<li><strong>k3s nodes can't reach Harbor over HTTP</strong> — verify each node's
+   <code>/etc/rancher/k3s/registries.yaml</code> lists <code>harbor.dev.lan</code> as an insecure
+   mirror. See <a href="../../services/harbor/#step-4--trust-harbordevlan-on-every-k3s-node">Harbor Ingress setup</a>.</li>
+<li><strong>Pull secret missing</strong> — <code>kubectl get secrets -n borra-bot-journal</code>
+   should show <code>harbor-secret</code>. If not, re-run the secret creation command
+   from step 3 above.</li>
+</ol>
+<h3 id="cron-runs-but-borra-botdevlan-shows-stale-content">Cron runs but <code>borra-bot.dev.lan</code> shows stale content</h3>
+<p>The Deployment uses <code>imagePullPolicy: Always</code>, so a rollout-restart triggers
+a fresh pull. If you suspect Harbor was offline during the build:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Confirm the image actually got pushed</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>kubectl<span class="w"> </span>describe<span class="w"> </span>pod<span class="w"> </span>-n<span class="w"> </span>borra-bot-journal<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>borra-bot-journal<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>Image
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Check Harbor for the tag</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>docker<span class="w"> </span>pull<span class="w"> </span>harbor.dev.lan/library/borra-bot-journal:<span class="k">$(</span>date<span class="w"> </span>-u<span class="w"> </span>+%Y-%m-%d<span class="k">)</span>
+</code></pre></div>
+<h3 id="build-fails-with-mkdocs-command-not-found">Build fails with <code>mkdocs: command not found</code></h3>
+<p>The cron user's PATH doesn't include the uv venv. The script uses
+<code>uv run mkdocs build</code> (not bare <code>mkdocs</code>), which uses the project's venv —
+but <code>uv</code> itself still needs to be on PATH. Either install <code>uv</code> system-wide
+or add it to the crontab line:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>30 0 * * *  PATH=/usr/local/bin:$HOME/.local/bin:$PATH /home/homelab/borra-bot/scripts/deploy-journal.sh ...
+</code></pre></div>
+<h3 id="git-pull-fails-auth"><code>git pull</code> fails (auth)</h3>
+<p>If the host clones over HTTPS without credentials, switch to SSH:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nb">cd</span><span class="w"> </span>/home/homelab/borra-bot
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>git<span class="w"> </span>remote<span class="w"> </span>set-url<span class="w"> </span>origin<span class="w"> </span>git@github.com:jcarranz97/borra-bot.git
+</code></pre></div>
+<p>…and ensure the cron user has a working SSH key for GitHub.</p>
+<h2 id="tear-down">Tear-down</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>kubectl<span class="w"> </span>delete<span class="w"> </span>namespace<span class="w"> </span>borra-bot-journal
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="c1"># Removes Deployment, Service, Ingress, and the pull secret.</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># Drop the crontab entry</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>crontab<span class="w"> </span>-e<span class="w">   </span><span class="c1"># delete the deploy-journal.sh line</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="c1"># Optionally clean Harbor</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="c1"># Through the UI: Projects → library → borra-bot-journal → Delete repository</span>
+</code></pre></div>
+<h2 id="references">References</h2>
 <ul>
-<li>Basic understanding of containers and Docker</li>
-<li>Familiarity with Kubernetes concepts</li>
-<li>Access to a Kubernetes cluster (or willingness to set one up)</li>
-<li>Command line experience with <code>kubectl</code></li>
-</ul>
-<h2 id="contributing">Contributing</h2>
-<p>This is my personal documentation, but if you find errors or have suggestions, feel free to reach out!</p>
-<h2 id="next-steps">Next Steps</h2>
-<p>Ready to dive in? Here are some suggested paths:</p>
-<ul>
-<li><strong>Setting Up Your Own</strong>: <a href="../k8s-cluster-setup/">K8s Cluster Setup Guide</a></li>
-<li><strong>Infrastructure Tour</strong>: <a href="../../infrastructure/hardware/">Hardware Overview</a></li>
-<li><strong>First Deployment</strong>: <a href="../harbor-k8s-deployment/">Harbor &amp; K8s Deployment Guide</a></li>
-<li><strong>Service Catalog</strong>: <a href="../../services/overview/">Services Overview</a></li>
+<li><a href="../../services/harbor/">Harbor Container Registry</a> — registry URL, pull-secret pattern</li>
+<li><a href="../k8s-harbor-http-registry/">K8s Harbor HTTP Registry Setup</a> — node-level config</li>
+<li><a href="../hermes-k8s-deployment/">Hermes K8s Deployment</a> — template this guide follows</li>
+<li>Borra Bot repo: <a href="https://github.com/jcarranz97/borra-bot">https://github.com/jcarranz97/borra-bot</a></li>
 </ul>
 
 
