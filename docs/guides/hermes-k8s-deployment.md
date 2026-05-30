@@ -660,6 +660,36 @@ Then ask the bot in Telegram what tools it has — colony's appear as `mcp_colon
     which remains blocked. The selector rule only reaches `colony-mcp:8002`, so it doesn't widen the
     LAN the way an `ipBlock` would.
 
+### Confirm the MCP connection
+
+Rather than reading logs by hand, run the repo's MCP checker against the namespace. For every
+server in `config.yaml`'s `mcp_servers`, it verifies — from the live pod — that the `${VAR}`
+placeholders resolve, the server's `host:port` is reachable through the NetworkPolicy, the gateway
+actually registered its tools, and that no auth/credential errors occurred when the agent called
+them:
+
+```bash
+./scripts/verify-hermes-mcp.sh hermes        # pass your namespace
+```
+
+```text
+● colony  http://colony-mcp.colony-dev.svc.cluster.local:8002/mcp
+    ✔ PASS  all ${VAR} placeholders resolve: COLONY_PAT
+    ✔ PASS  TCP reachable at colony-mcp.colony-dev.svc.cluster.local:8002
+    ✔ PASS  connected — 35 tool(s) registered (per agent.log)
+    ✔ PASS  no auth/tool-call errors in logs
+```
+
+It prints `PASS`/`WARN`/`FAIL` per check and exits non-zero if any server isn't fully working, so it
+doubles as a post-deploy gate. The checks map cleanly to where things break:
+
+| FAIL line | Fix |
+|-----------|-----|
+| env var(s) not set in pod | Add the token to the Secret and restart (`${VAR}` is read from the env). |
+| cannot reach `host:port` | The NetworkPolicy has no egress rule to that server — add one (see Step "Open the network"). |
+| no `registered N tool(s)` line | The gateway hasn't connected; check `config.yaml` and restart. |
+| token rejected (HTTP 401) | The plumbing is fine but the server refused the credential — wrong/expired token, or it belongs to a different instance. |
+
 ## Security Checklist
 
 Before considering the deployment "safe to experiment with", confirm:
