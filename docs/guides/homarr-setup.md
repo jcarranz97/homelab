@@ -84,17 +84,27 @@ helm install homarr homarr-labs/homarr \
   --namespace homarr \
   --set ingress.enabled=true \
   --set ingress.className=nginx \
-  --set ingress.hosts[0].host=home.dev.lan \
-  --set ingress.hosts[0].paths[0].path=/ \
-  --set ingress.hosts[0].paths[0].pathType=Prefix \
-  --set persistence.enabled=true \
-  --set persistence.size=2Gi \
-  --set persistence.storageClassName=standard
+  --set "ingress.hosts[0].host=home.dev.lan" \
+  --set "ingress.hosts[0].paths[0].path=/" \
+  --set "ingress.hosts[0].paths[0].pathType=Prefix" \
+  --set persistence.homarrDatabase.enabled=true \
+  --set persistence.homarrDatabase.size=2Gi \
+  --set persistence.homarrDatabase.storageClassName=local-path
 ```
 
+!!! warning "Persistence schema changed in chart v8.x"
+    The persistence parameters changed in the v8.x chart. The correct keys are
+    `persistence.homarrDatabase.*` (not `persistence.*`). Using the old
+    `persistence.enabled=true` / `persistence.storageClassName=standard` values
+    silently creates a deployment with **no PVC**, so all dashboard configuration
+    is lost on every pod restart. Also note that the homelab cluster only has the
+    `local-path` storage class — using `standard` causes the PVC to never be
+    created.
+
 This single command will:
+
 - Create the Homarr deployment
-- Configure storage with 2Gi PersistentVolumeClaim
+- Configure storage with 2Gi PersistentVolumeClaim (mounted at `/appdata`)
 - Set up Ingress for `home.dev.lan`
 - Enable persistence for your app data
 

@@ -41,7 +41,7 @@ To add your homelab applications to Homarr:
 
 | Application | URL | Category | Status |
 |-------------|-----|----------|--------|
-| Rancher | http://rancher.local | Infrastructure | ✅ |
+| Rancher | http://rancher.dev.lan | Infrastructure | ✅ |
 | Harbor | http://harbor.dev.lan | Container Registry | ✅ |
 | Fast-API | http://fast-api.dev.lan | Development | ✅ |
 | Multica | http://multica.dev.lan | Tools | ✅ |
@@ -119,21 +119,21 @@ Homarr links to Rancher for cluster management and app deployment.
 ```bash
 # Create a backup of Homarr data
 kubectl exec -n homarr deployment/homarr -- \
-  tar czf /app/data/homarr-backup.tar.gz /app/data
+  tar czf /appdata/homarr-backup.tar.gz /appdata
 
 # Copy backup to local machine
-kubectl cp homarr/$(kubectl get pods -n homarr -l app.kubernetes.io/name=homarr -o jsonpath='{.items[0].metadata.name}'):/app/data/homarr-backup.tar.gz ./homarr-backup.tar.gz
+kubectl cp homarr/$(kubectl get pods -n homarr -l app.kubernetes.io/name=homarr -o jsonpath='{.items[0].metadata.name}'):/appdata/homarr-backup.tar.gz ./homarr-backup.tar.gz
 ```
 
 ### Restore Homarr Configuration
 
 ```bash
 # Copy backup back to pod
-kubectl cp ./homarr-backup.tar.gz homarr/$(kubectl get pods -n homarr -l app.kubernetes.io/name=homarr -o jsonpath='{.items[0].metadata.name}'):/app/data/
+kubectl cp ./homarr-backup.tar.gz homarr/$(kubectl get pods -n homarr -l app.kubernetes.io/name=homarr -o jsonpath='{.items[0].metadata.name}'):/appdata/
 
 # Restore from backup
 kubectl exec -n homarr deployment/homarr -- \
-  tar xzf /app/data/homarr-backup.tar.gz -C /app/data
+  tar xzf /appdata/homarr-backup.tar.gz -C /appdata
 ```
 
 ## Troubleshooting
