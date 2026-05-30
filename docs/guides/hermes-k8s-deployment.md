@@ -555,11 +555,20 @@ file**. After changing MCP config, reload in-chat with `/reload-mcp` — no pod 
 Tools are exposed to the agent as `mcp_<server>_<tool>`; use `tools.include` / `tools.exclude` to
 restrict them.
 
-### Example: the colony MCP server (on the LAN)
+### Example: the colony MCP server (in-cluster)
 
-`colony` runs **inside the homelab** at `http://mcp.colony-dev.dev.lan/mcp`. Two things differ from
-a public server: the NetworkPolicy (Step 7) blocks the LAN, so you must open a **narrow** hole just
-for colony; and the URL is plain HTTP (port 80).
+`colony` runs **in the same k3s cluster** — its ingress `http://mcp.colony-dev.dev.lan/mcp`
+resolves to a node IP (`192.168.1.206`), but behind that it's a Kubernetes Service,
+`colony-mcp` in namespace `colony-dev`, listening on port `8002`. Because of that, you reach it
+from the pod by its **in-cluster Service DNS name**, and you open the firewall to it with a
+**namespace + pod selector** — which is both correct and far tighter than any IP rule.
+
+!!! danger "Why an `ipBlock` rule for the ingress IP does *not* work"
+    It's tempting to allow `192.168.1.206:80` (the ingress). That fails: `192.168.1.206:80` is a
+    NodePort/LoadBalancer that **DNATs** the connection to the Traefik pod on a *different* port
+    before the NetworkPolicy is evaluated. The policy sees the post-DNAT destination (a `10.42.x`
+    pod IP on Traefik's container port), so an `ipBlock: 192.168.1.206/32` allow never matches and
+    the connection is refused. Target the backing Service's pods instead, as below.
 
 **1. Put the colony token in the Secret**
 
@@ -570,13 +579,15 @@ kubectl patch secret hermes-secrets -n hermes --type merge \
 
 **2. Register the server in `config.yaml`**
 
-Append the block to the live config on the PVC (no in-pod editor required), then reload:
+Use the in-cluster Service URL (`colony-mcp.colony-dev.svc.cluster.local:8002`) — the app-level
+Bearer token still authenticates you when hitting the Service directly. Append the block to the
+live config on the PVC (no in-pod editor required), then reload:
 
 ```bash
 kubectl exec -n hermes deployment/hermes -i -- sh -c 'cat >> /opt/data/config.yaml' <<'YAML'
 mcp_servers:
   colony:
-    url: "http://mcp.colony-dev.dev.lan/mcp"
+    url: "http://colony-mcp.colony-dev.svc.cluster.local:8002/mcp"
     headers:
       Authorization: "Bearer ${COLONY_PAT}"
 YAML
@@ -587,34 +598,39 @@ Remember the init container only seeds `config.yaml` when the PVC is empty, so t
 *new* deployments while the `cat >>` above updates the *current* one. (If `config.yaml` already has
 an `mcp_servers:` key, merge into it rather than appending a second one.)
 
-**3. Open the network to colony only**
+**3. Open the network to colony-mcp only**
 
-`mcp.colony-dev.dev.lan` resolves to `192.168.1.206:80`. Add **one** egress rule to the policy from
-Step 7 — alongside the existing DNS and internet rules, *not* replacing them:
+Add **one** egress rule to the policy from Step 7 — alongside the existing DNS and internet rules,
+*not* replacing them. It matches only the `colony-mcp` pods in `colony-dev`, on port `8002`:
 
 ```yaml
   egress:
     # ... keep the existing DNS + internet rules ...
 
-    # Colony MCP server on the LAN — the ONLY private address allowed
+    # Colony MCP server — ONLY the colony-mcp pods in namespace colony-dev
     - to:
-        - ipBlock:
-            cidr: 192.168.1.206/32
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: colony-dev
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: colony
+              app.kubernetes.io/component: mcp
       ports:
-        - { protocol: TCP, port: 80 }
+        - { protocol: TCP, port: 8002 }
 ```
 
 ```bash
 kubectl apply -f hermes-networkpolicy.yaml
 ```
 
-!!! warning "An IP allow is not a hostname allow — know what you're opening"
-    `192.168.1.206` is the **shared Traefik ingress node**: Harbor, the Borra Bot journal, and other
-    homelab sites answer on the *same* IP and port 80, separated only by the `Host` header. A
-    NetworkPolicy filters by IP + port, **not** hostname — so this rule technically also lets the
-    agent reach those other port-80 ingress services (by sending their hostname). Each still enforces
-    its own auth, but if colony must be the *only* reachable service, give it a dedicated address (a
-    `LoadBalancer` IP or its own NodePort) and allow **that** `/32` instead of the shared ingress IP.
+!!! tip "Selector targeting beats an IP allow"
+    Because `namespaceSelector` + `podSelector` (combined in one `to:` element) pin the rule to the
+    exact MCP pods, the agent can reach **only** `colony-mcp:8002` — not colony's frontend, backend,
+    or Postgres, and nothing else behind the shared ingress. Find the right labels with
+    `kubectl get pod -n colony-dev --show-labels` (here: `app.kubernetes.io/instance=colony`,
+    `app.kubernetes.io/component=mcp`). For a colony deployment in a different namespace, adjust both
+    selectors.
 
 **4. Reload and verify**
 
@@ -622,20 +638,27 @@ kubectl apply -f hermes-networkpolicy.yaml
 # In Telegram, send this to the bot to reload MCP without restarting:
 /reload-mcp
 
-# Confirm the pod can now reach colony…
+# Confirm the pod can reach colony-mcp (HTTP 406/401 = reachable; the app answered)…
 kubectl exec -n hermes deployment/hermes -- python3 -c \
-  "import socket; s=socket.socket(); s.settimeout(5); s.connect(('192.168.1.206',80)); print('colony reachable'); s.close()"
+  "import urllib.request as u, urllib.error
+try:
+    print('HTTP', u.urlopen('http://colony-mcp.colony-dev.svc.cluster.local:8002/mcp', timeout=8).status)
+except urllib.error.HTTPError as e: print('HTTP', e.code, '(reachable)')"
 
-# …while the rest of the cluster/LAN stays blocked (kube API must still be unreachable):
+# …while colony's OTHER services and the cluster stay blocked:
+kubectl exec -n hermes deployment/hermes -- python3 -c \
+  "import socket; s=socket.socket(); s.settimeout(5)
+try: s.connect(('10.43.130.136',5432)); print('postgres REACHABLE (leak)')
+except Exception as e: print('colony postgres blocked:', type(e).__name__)"
 ./scripts/verify-hermes-isolation.sh hermes
 ```
 
 Then ask the bot in Telegram what tools it has — colony's appear as `mcp_colony_*`.
 
-!!! note "The isolation script and an intentional hole"
+!!! note "The isolation script stays green"
     `verify-hermes-isolation.sh` still passes — its decisive probe is the Kubernetes API ClusterIP,
-    which stays blocked. If you point `TEST_LAN_TARGET=192.168.1.206:80` at colony it will now report
-    `FAIL` (reachable) — that's expected, because you opened it on purpose.
+    which remains blocked. The selector rule only reaches `colony-mcp:8002`, so it doesn't widen the
+    LAN the way an `ipBlock` would.
 
 ## Security Checklist
 
