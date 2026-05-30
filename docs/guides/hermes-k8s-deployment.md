@@ -557,9 +557,9 @@ restrict them.
 
 ### Example: the colony MCP server (in-cluster)
 
-`colony` runs **in the same k3s cluster** — its ingress `http://mcp.colony-dev.dev.lan/mcp`
+`colony` runs **in the same k3s cluster** — its ingress `http://mcp.colony.dev.lan/mcp`
 resolves to a node IP (`192.168.1.206`), but behind that it's a Kubernetes Service,
-`colony-mcp` in namespace `colony-dev`, listening on port `8002`. Because of that, you reach it
+`colony-mcp` in namespace `colony-app`, listening on port `8002`. Because of that, you reach it
 from the pod by its **in-cluster Service DNS name**, and you open the firewall to it with a
 **namespace + pod selector** — which is both correct and far tighter than any IP rule.
 
@@ -579,7 +579,7 @@ kubectl patch secret hermes-secrets -n hermes --type merge \
 
 **2. Register the server in `config.yaml`**
 
-Use the in-cluster Service URL (`colony-mcp.colony-dev.svc.cluster.local:8002`) — the app-level
+Use the in-cluster Service URL (`colony-mcp.colony-app.svc.cluster.local:8002`) — the app-level
 Bearer token still authenticates you when hitting the Service directly. Append the block to the
 live config on the PVC (no in-pod editor required), then reload:
 
@@ -587,7 +587,7 @@ live config on the PVC (no in-pod editor required), then reload:
 kubectl exec -n hermes deployment/hermes -i -- sh -c 'cat >> /opt/data/config.yaml' <<'YAML'
 mcp_servers:
   colony:
-    url: "http://colony-mcp.colony-dev.svc.cluster.local:8002/mcp"
+    url: "http://colony-mcp.colony-app.svc.cluster.local:8002/mcp"
     headers:
       Authorization: "Bearer ${COLONY_PAT}"
 YAML
@@ -601,17 +601,17 @@ an `mcp_servers:` key, merge into it rather than appending a second one.)
 **3. Open the network to colony-mcp only**
 
 Add **one** egress rule to the policy from Step 7 — alongside the existing DNS and internet rules,
-*not* replacing them. It matches only the `colony-mcp` pods in `colony-dev`, on port `8002`:
+*not* replacing them. It matches only the `colony-mcp` pods in `colony-app`, on port `8002`:
 
 ```yaml
   egress:
     # ... keep the existing DNS + internet rules ...
 
-    # Colony MCP server — ONLY the colony-mcp pods in namespace colony-dev
+    # Colony MCP server — ONLY the colony-mcp pods in namespace colony-app
     - to:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: colony-dev
+              kubernetes.io/metadata.name: colony-app
           podSelector:
             matchLabels:
               app.kubernetes.io/instance: colony
@@ -628,7 +628,7 @@ kubectl apply -f hermes-networkpolicy.yaml
     Because `namespaceSelector` + `podSelector` (combined in one `to:` element) pin the rule to the
     exact MCP pods, the agent can reach **only** `colony-mcp:8002` — not colony's frontend, backend,
     or Postgres, and nothing else behind the shared ingress. Find the right labels with
-    `kubectl get pod -n colony-dev --show-labels` (here: `app.kubernetes.io/instance=colony`,
+    `kubectl get pod -n colony-app --show-labels` (here: `app.kubernetes.io/instance=colony`,
     `app.kubernetes.io/component=mcp`). For a colony deployment in a different namespace, adjust both
     selectors.
 
@@ -642,13 +642,13 @@ kubectl apply -f hermes-networkpolicy.yaml
 kubectl exec -n hermes deployment/hermes -- python3 -c \
   "import urllib.request as u, urllib.error
 try:
-    print('HTTP', u.urlopen('http://colony-mcp.colony-dev.svc.cluster.local:8002/mcp', timeout=8).status)
+    print('HTTP', u.urlopen('http://colony-mcp.colony-app.svc.cluster.local:8002/mcp', timeout=8).status)
 except urllib.error.HTTPError as e: print('HTTP', e.code, '(reachable)')"
 
 # …while colony's OTHER services and the cluster stay blocked:
 kubectl exec -n hermes deployment/hermes -- python3 -c \
   "import socket; s=socket.socket(); s.settimeout(5)
-try: s.connect(('10.43.130.136',5432)); print('postgres REACHABLE (leak)')
+try: s.connect(('10.43.66.150',5432)); print('postgres REACHABLE (leak)')
 except Exception as e: print('colony postgres blocked:', type(e).__name__)"
 ./scripts/verify-hermes-isolation.sh hermes
 ```
@@ -673,9 +673,9 @@ them:
 ```
 
 ```text
-● colony  http://colony-mcp.colony-dev.svc.cluster.local:8002/mcp
+● colony  http://colony-mcp.colony-app.svc.cluster.local:8002/mcp
     ✔ PASS  all ${VAR} placeholders resolve: COLONY_PAT
-    ✔ PASS  TCP reachable at colony-mcp.colony-dev.svc.cluster.local:8002
+    ✔ PASS  TCP reachable at colony-mcp.colony-app.svc.cluster.local:8002
     ✔ PASS  connected — 35 tool(s) registered (per agent.log)
     ✔ PASS  no auth/tool-call errors in logs
 ```

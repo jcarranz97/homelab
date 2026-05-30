@@ -70,12 +70,12 @@ servers = cfg.get("mcp_servers") or {}
 if not servers:
     out("NOSERVERS"); sys.exit(0)
 
-logtext = ""
-for f in ("agent.log", "errors.log", "gateway.log"):
-    try:
-        logtext += open(os.path.join(LOGDIR, f), encoding="utf-8", errors="replace").read()
-    except Exception:
-        pass
+# agent.log accumulates across restarts, so error checks are scoped to the CURRENT
+# session — i.e. lines after the most recent MCP registration for each server.
+try:
+    agent_lines = open(os.path.join(LOGDIR, "agent.log"), encoding="utf-8", errors="replace").read().splitlines()
+except Exception:
+    agent_lines = []
 
 def placeholders(s):
     return re.findall(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}", s or "")
@@ -113,22 +113,28 @@ for name, sc in servers.items():
         finally:
             s.close()
 
-    # 3. did the gateway register this server's tools?
-    reg = re.findall(r"MCP server '%s'[^\n]*registered (\d+) tool" % re.escape(name), logtext)
-    if reg:
-        out("CHECK", name, "PASS", "connected — %s tool(s) registered (per agent.log)" % reg[-1])
+    # 3. did the gateway register this server's tools? (use the LAST registration as
+    #    the current-session boundary so stale errors from prior runs are ignored)
+    reg_idx = [i for i, l in enumerate(agent_lines)
+               if re.search(r"MCP server '%s'[^\n]*registered (\d+) tool" % re.escape(name), l)]
+    if reg_idx:
+        last = reg_idx[-1]
+        count = re.search(r"registered (\d+) tool", agent_lines[last]).group(1)
+        out("CHECK", name, "PASS", "connected — %s tool(s) registered (per agent.log)" % count)
+        recent = agent_lines[last:]      # current session only
     else:
         out("CHECK", name, "WARN", "no 'registered N tool(s)' line in logs — not connected yet, or logs rotated; restart and recheck")
+        recent = []
 
-    # 4. auth / tool-call errors for THIS server
-    toollines = re.findall(r"Tool mcp_%s_\w+ returned error[^\n]*" % re.escape(name), logtext)
+    # 4. auth / tool-call errors for THIS server, SINCE the current connection
+    toollines = [l for l in recent if re.search(r"Tool mcp_%s_\w+ returned error" % re.escape(name), l)]
     autherr = [l for l in toollines if re.search(r"401|validate credentials|[Uu]nauthorized|[Ff]orbidden", l)]
     if autherr:
         out("CHECK", name, "FAIL", "token rejected by the server (e.g. HTTP 401 'Could not validate credentials') — check the token value / that it belongs to this instance")
     elif toollines:
-        out("CHECK", name, "WARN", "%d tool-call error(s) in logs — inspect agent.log" % len(toollines))
+        out("CHECK", name, "WARN", "%d tool-call error(s) since last connect — inspect agent.log" % len(toollines))
     else:
-        out("CHECK", name, "PASS", "no auth/tool-call errors in logs")
+        out("CHECK", name, "PASS", "no auth/tool-call errors since the current connection")
 PY
 )
 
