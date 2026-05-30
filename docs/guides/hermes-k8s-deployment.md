@@ -520,6 +520,123 @@ isn't in it. To hand the bot to a different person, or add more people, update t
     include both IDs comma-separated. Listing only their ID removes yours. The same pattern works
     for rotating any value (`TELEGRAM_BOT_TOKEN`, `MINIMAX_API_KEY`) — patch the key, restart.
 
+## Connecting MCP Servers (External Tools)
+
+Hermes is an MCP **client**, so you can extend the agent with tools from MCP servers. With the
+`claude` CLI you'd run `claude mcp add --transport http <name> <url> --header "Authorization:
+Bearer …"`; Hermes has no equivalent one-liner — you declare servers in `config.yaml` under
+`mcp_servers`. It resolves `${VAR}` placeholders in `url` and `headers` from the environment at
+connect time (including everything injected from your Secret), so **tokens never sit in the config
+file**. After changing MCP config, reload in-chat with `/reload-mcp` — no pod restart needed.
+
+### Generic HTTP MCP server
+
+1. Store the server's token in the Secret (it becomes an env var in the pod):
+
+   ```bash
+   kubectl patch secret hermes-secrets -n hermes --type merge \
+     -p "{\"data\":{\"EXAMPLE_TOKEN\":\"$(printf 'your-token' | base64)\"}}"
+   ```
+
+2. Add an `mcp_servers` block to `config.yaml`, referencing the token with `${EXAMPLE_TOKEN}`:
+
+   ```yaml
+   mcp_servers:
+     example:
+       url: "https://mcp.example.com/mcp"
+       headers:
+         Authorization: "Bearer ${EXAMPLE_TOKEN}"
+       tools:
+         include: [list_things, get_thing]   # optional: limit which tools the agent may call
+   ```
+
+3. Apply it to the running pod and reload (see the colony example for the exact commands).
+
+Tools are exposed to the agent as `mcp_<server>_<tool>`; use `tools.include` / `tools.exclude` to
+restrict them.
+
+### Example: the colony MCP server (on the LAN)
+
+`colony` runs **inside the homelab** at `http://mcp.colony-dev.dev.lan/mcp`. Two things differ from
+a public server: the NetworkPolicy (Step 7) blocks the LAN, so you must open a **narrow** hole just
+for colony; and the URL is plain HTTP (port 80).
+
+**1. Put the colony token in the Secret**
+
+```bash
+kubectl patch secret hermes-secrets -n hermes --type merge \
+  -p "{\"data\":{\"COLONY_PAT\":\"$(printf 'colony_pat_your_new_token_here' | base64)\"}}"
+```
+
+**2. Register the server in `config.yaml`**
+
+Append the block to the live config on the PVC (no in-pod editor required), then reload:
+
+```bash
+kubectl exec -n hermes deployment/hermes -i -- sh -c 'cat >> /opt/data/config.yaml' <<'YAML'
+mcp_servers:
+  colony:
+    url: "http://mcp.colony-dev.dev.lan/mcp"
+    headers:
+      Authorization: "Bearer ${COLONY_PAT}"
+YAML
+```
+
+Also mirror the same block into the `hermes-config` ConfigMap (Step 5) so a fresh redeploy keeps it.
+Remember the init container only seeds `config.yaml` when the PVC is empty, so the ConfigMap covers
+*new* deployments while the `cat >>` above updates the *current* one. (If `config.yaml` already has
+an `mcp_servers:` key, merge into it rather than appending a second one.)
+
+**3. Open the network to colony only**
+
+`mcp.colony-dev.dev.lan` resolves to `192.168.1.206:80`. Add **one** egress rule to the policy from
+Step 7 — alongside the existing DNS and internet rules, *not* replacing them:
+
+```yaml
+  egress:
+    # ... keep the existing DNS + internet rules ...
+
+    # Colony MCP server on the LAN — the ONLY private address allowed
+    - to:
+        - ipBlock:
+            cidr: 192.168.1.206/32
+      ports:
+        - { protocol: TCP, port: 80 }
+```
+
+```bash
+kubectl apply -f hermes-networkpolicy.yaml
+```
+
+!!! warning "An IP allow is not a hostname allow — know what you're opening"
+    `192.168.1.206` is the **shared Traefik ingress node**: Harbor, the Borra Bot journal, and other
+    homelab sites answer on the *same* IP and port 80, separated only by the `Host` header. A
+    NetworkPolicy filters by IP + port, **not** hostname — so this rule technically also lets the
+    agent reach those other port-80 ingress services (by sending their hostname). Each still enforces
+    its own auth, but if colony must be the *only* reachable service, give it a dedicated address (a
+    `LoadBalancer` IP or its own NodePort) and allow **that** `/32` instead of the shared ingress IP.
+
+**4. Reload and verify**
+
+```bash
+# In Telegram, send this to the bot to reload MCP without restarting:
+/reload-mcp
+
+# Confirm the pod can now reach colony…
+kubectl exec -n hermes deployment/hermes -- python3 -c \
+  "import socket; s=socket.socket(); s.settimeout(5); s.connect(('192.168.1.206',80)); print('colony reachable'); s.close()"
+
+# …while the rest of the cluster/LAN stays blocked (kube API must still be unreachable):
+./scripts/verify-hermes-isolation.sh hermes
+```
+
+Then ask the bot in Telegram what tools it has — colony's appear as `mcp_colony_*`.
+
+!!! note "The isolation script and an intentional hole"
+    `verify-hermes-isolation.sh` still passes — its decisive probe is the Kubernetes API ClusterIP,
+    which stays blocked. If you point `TEST_LAN_TARGET=192.168.1.206:80` at colony it will now report
+    `FAIL` (reachable) — that's expected, because you opened it on purpose.
+
 ## Security Checklist
 
 Before considering the deployment "safe to experiment with", confirm:
@@ -531,6 +648,8 @@ Before considering the deployment "safe to experiment with", confirm:
 - [ ] No `hostPath` mounts, no `privileged`, no `hostNetwork`, no exposed Ingress/port.
 - [ ] Secrets live in a `Secret`, not in the image or `config.yaml`.
 - [ ] State lives on a PVC — the pod itself is disposable.
+- [ ] Any MCP egress hole is as narrow as possible, and MCP tokens are `${VAR}` references to the
+      Secret — not pasted into `config.yaml`.
 
 ### Automated isolation check
 
