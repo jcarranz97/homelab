@@ -1957,7 +1957,7 @@
 <tbody>
 <tr>
 <td>Rancher</td>
-<td>http://rancher.local</td>
+<td>http://rancher.dev.lan</td>
 <td>Infrastructure</td>
 <td>✅</td>
 </tr>
@@ -2038,18 +2038,18 @@
 <h3 id="backup-homarr-configuration">Backup Homarr Configuration</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Create a backup of Homarr data</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>homarr<span class="w"> </span>deployment/homarr<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>tar<span class="w"> </span>czf<span class="w"> </span>/app/data/homarr-backup.tar.gz<span class="w"> </span>/app/data
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>tar<span class="w"> </span>czf<span class="w"> </span>/appdata/homarr-backup.tar.gz<span class="w"> </span>/appdata
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Copy backup to local machine</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>kubectl<span class="w"> </span>cp<span class="w"> </span>homarr/<span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>homarr<span class="w"> </span>-l<span class="w"> </span>app.kubernetes.io/name<span class="o">=</span>homarr<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.items[0].metadata.name}&#39;</span><span class="k">)</span>:/app/data/homarr-backup.tar.gz<span class="w"> </span>./homarr-backup.tar.gz
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>kubectl<span class="w"> </span>cp<span class="w"> </span>homarr/<span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>homarr<span class="w"> </span>-l<span class="w"> </span>app.kubernetes.io/name<span class="o">=</span>homarr<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.items[0].metadata.name}&#39;</span><span class="k">)</span>:/appdata/homarr-backup.tar.gz<span class="w"> </span>./homarr-backup.tar.gz
 </code></pre></div>
 <h3 id="restore-homarr-configuration">Restore Homarr Configuration</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Copy backup back to pod</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>kubectl<span class="w"> </span>cp<span class="w"> </span>./homarr-backup.tar.gz<span class="w"> </span>homarr/<span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>homarr<span class="w"> </span>-l<span class="w"> </span>app.kubernetes.io/name<span class="o">=</span>homarr<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.items[0].metadata.name}&#39;</span><span class="k">)</span>:/app/data/
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>kubectl<span class="w"> </span>cp<span class="w"> </span>./homarr-backup.tar.gz<span class="w"> </span>homarr/<span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>homarr<span class="w"> </span>-l<span class="w"> </span>app.kubernetes.io/name<span class="o">=</span>homarr<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.items[0].metadata.name}&#39;</span><span class="k">)</span>:/appdata/
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Restore from backup</span>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>homarr<span class="w"> </span>deployment/homarr<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span>tar<span class="w"> </span>xzf<span class="w"> </span>/app/data/homarr-backup.tar.gz<span class="w"> </span>-C<span class="w"> </span>/app/data
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span>tar<span class="w"> </span>xzf<span class="w"> </span>/appdata/homarr-backup.tar.gz<span class="w"> </span>-C<span class="w"> </span>/appdata
 </code></pre></div>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <h3 id="homarr-not-accessible-via-homedevlan">Homarr not accessible via <code>home.dev.lan</code></h3>

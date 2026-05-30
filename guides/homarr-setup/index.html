@@ -1911,18 +1911,30 @@
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span>--namespace<span class="w"> </span>homarr<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>--set<span class="w"> </span>ingress.enabled<span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span>--set<span class="w"> </span>ingress.className<span class="o">=</span>nginx<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span>--set<span class="w"> </span>ingress.hosts<span class="o">[</span><span class="m">0</span><span class="o">]</span>.host<span class="o">=</span>home.dev.lan<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span>--set<span class="w"> </span>ingress.hosts<span class="o">[</span><span class="m">0</span><span class="o">]</span>.paths<span class="o">[</span><span class="m">0</span><span class="o">]</span>.path<span class="o">=</span>/<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span>--set<span class="w"> </span>ingress.hosts<span class="o">[</span><span class="m">0</span><span class="o">]</span>.paths<span class="o">[</span><span class="m">0</span><span class="o">]</span>.pathType<span class="o">=</span>Prefix<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span>--set<span class="w"> </span>persistence.enabled<span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span>--set<span class="w"> </span>persistence.size<span class="o">=</span>2Gi<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">  </span>--set<span class="w"> </span>persistence.storageClassName<span class="o">=</span>standard
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span>--set<span class="w"> </span><span class="s2">&quot;ingress.hosts[0].host=home.dev.lan&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span>--set<span class="w"> </span><span class="s2">&quot;ingress.hosts[0].paths[0].path=/&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span>--set<span class="w"> </span><span class="s2">&quot;ingress.hosts[0].paths[0].pathType=Prefix&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span>--set<span class="w"> </span>persistence.homarrDatabase.enabled<span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span>--set<span class="w"> </span>persistence.homarrDatabase.size<span class="o">=</span>2Gi<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">  </span>--set<span class="w"> </span>persistence.homarrDatabase.storageClassName<span class="o">=</span>local-path
 </code></pre></div>
-<p>This single command will:
-- Create the Homarr deployment
-- Configure storage with 2Gi PersistentVolumeClaim
-- Set up Ingress for <code>home.dev.lan</code>
-- Enable persistence for your app data</p>
+<div class="admonition warning">
+<p class="admonition-title">Persistence schema changed in chart v8.x</p>
+<p>The persistence parameters changed in the v8.x chart. The correct keys are
+<code>persistence.homarrDatabase.*</code> (not <code>persistence.*</code>). Using the old
+<code>persistence.enabled=true</code> / <code>persistence.storageClassName=standard</code> values
+silently creates a deployment with <strong>no PVC</strong>, so all dashboard configuration
+is lost on every pod restart. Also note that the homelab cluster only has the
+<code>local-path</code> storage class — using <code>standard</code> causes the PVC to never be
+created.</p>
+</div>
+<p>This single command will:</p>
+<ul>
+<li>Create the Homarr deployment</li>
+<li>Configure storage with 2Gi PersistentVolumeClaim (mounted at <code>/appdata</code>)</li>
+<li>Set up Ingress for <code>home.dev.lan</code></li>
+<li>Enable persistence for your app data</li>
+</ul>
 <h2 id="step-5-verify-deployment">Step 5: Verify Deployment</h2>
 <p>Check that the pods are running:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>homarr
