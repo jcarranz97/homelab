@@ -532,6 +532,32 @@ Before considering the deployment "safe to experiment with", confirm:
 - [ ] Secrets live in a `Secret`, not in the image or `config.yaml`.
 - [ ] State lives on a PVC — the pod itself is disposable.
 
+### Automated isolation check
+
+Rather than walking the list by hand, run the repo's checker against the namespace. It verifies
+every item above from the live cluster — no SA token or RoleBindings, no host access, the
+NetworkPolicy is present, the agent backend is `local`, and (from inside the pod) that DNS and
+outbound HTTPS work while the Kubernetes API and the LAN are **blocked**:
+
+```bash
+./scripts/verify-hermes-isolation.sh hermes        # pass your namespace
+```
+
+It prints `PASS`/`WARN`/`FAIL` per check and exits non-zero if any critical control is missing,
+so it also works in CI or a pre-flight gate. To additionally prove a *specific* homelab service is
+unreachable, point it at one (host:port that you know has a listener):
+
+```bash
+TEST_LAN_TARGET=192.168.1.206:30002 ./scripts/verify-hermes-isolation.sh hermes
+```
+
+!!! note "Blocked may show as 'rejected', not 'timeout'"
+    A correctly blocked connection can appear as either a **timeout** (drop-mode policy engines)
+    or a **connection refused / RST** (reject-mode engines like k3s/kube-router). The script
+    treats both as blocked — only an actual `CONNECTED` to a private target is a leak. The
+    decisive probe targets the Kubernetes API ClusterIP, which always has a listener, so a
+    successful connect there unambiguously means egress is leaking.
+
 ## Tear-Down
 
 Because everything is namespaced, removing Hermes is one command:
