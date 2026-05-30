@@ -2,6 +2,117 @@
 
 This section documents common issues I've encountered in my homelab and their solutions.
 
+## Homarr Dashboard Lost After Restart
+
+**Problem**: Homarr configuration (tiles, layout, apps) disappears every time the pod restarts.
+
+**Root Cause**: The Helm chart v8.x changed the persistence parameter schema. Using the old
+`persistence.enabled=true` with `persistence.storageClassName=standard` silently creates the
+deployment without any PVC — all data lives in the container's ephemeral filesystem.
+Additionally, there is no `standard` StorageClass in this cluster (only `local-path`), so
+even the old schema would fail to provision a volume.
+
+**Diagnosis**:
+
+```bash
+# No PVC means no persistence
+kubectl get pvc -n homarr
+# Expected (broken): No resources found
+# Expected (healthy): homarr-database   Bound   ...
+
+# Check current Helm values
+helm get values homarr -n homarr
+# Broken: persistence.enabled=true, storageClassName=standard
+# Fixed:  persistence.homarrDatabase.enabled=true, storageClassName=local-path
+```
+
+**Fix**: Upgrade with the correct persistence schema:
+
+```bash
+helm upgrade homarr homarr-labs/homarr -n homarr \
+  --reuse-values \
+  --set persistence.homarrDatabase.enabled=true \
+  --set persistence.homarrDatabase.storageClassName=local-path \
+  --set persistence.homarrDatabase.size=2Gi
+```
+
+Verify the PVC was created and is bound:
+
+```bash
+kubectl get pvc -n homarr
+# NAME              STATUS   VOLUME   CAPACITY   STORAGECLASS
+# homarr-database   Bound    ...      2Gi        local-path
+```
+
+After the upgrade, reconfigure the dashboard once — it will persist through future restarts.
+
+---
+
+## Rancher Cluster Showing as "Unavailable"
+
+**Problem**: An imported cluster shows `Unavailable — Cluster agent is not connected` in Rancher.
+
+**Root Cause**: The `cattle-cluster-agent` deployment has `CATTLE_SERVER` hardcoded to a hostname
+whose TLS certificate no longer matches — either because the Rancher URL changed or the
+certificate was re-issued for a different hostname.
+
+**Diagnosis**:
+
+```bash
+# Check agent pod logs for TLS or DNS errors
+kubectl logs -n cattle-system -l app=cattle-cluster-agent --tail=20
+
+# Common errors:
+# "x509: certificate is valid for <old-name>, not <cattle-server-hostname>"
+# "Could not resolve host: <hostname>"
+
+# Check what URL the agent is configured to use
+kubectl get deployment cattle-cluster-agent -n cattle-system \
+  -o jsonpath='{.spec.template.spec.containers[0].env}' | \
+  python3 -c "import sys,json; [print(e['name'],'=',e.get('value','[ref]')) for e in json.load(sys.stdin) if 'SERVER' in e['name']]"
+```
+
+**Fix**:
+
+1. Identify the correct Rancher hostname (the one matching the TLS certificate SAN):
+
+   ```bash
+   KUBECONFIG=~/.kube/k3s-local.yaml kubectl get secret tls-rancher-ingress \
+     -n cattle-system -o jsonpath='{.data.tls\.crt}' | \
+     base64 -d | openssl x509 -noout -text | grep "DNS:"
+   ```
+
+2. Update the credentials secret and the deployment env var:
+
+   ```bash
+   RANCHER_URL="https://rancher.dev.lan"  # replace with your correct hostname
+
+   kubectl patch secret cattle-credentials-<id> -n cattle-system \
+     --type='json' \
+     -p='[{"op":"replace","path":"/data/url","value":"'$(echo -n "$RANCHER_URL" | base64)'"}]'
+
+   # Find the index of CATTLE_SERVER in the env array, then patch it
+   kubectl patch deployment cattle-cluster-agent -n cattle-system --type='json' \
+     -p='[{"op":"replace","path":"/spec/template/spec/containers/0/env/<index>/value","value":"'"$RANCHER_URL"'"}]'
+   ```
+
+3. If the cluster pods cannot resolve the Rancher hostname via DNS, add a `hostAlias`:
+
+   ```bash
+   RANCHER_IP="192.168.1.233"  # replace with your Rancher ingress IP
+   kubectl patch deployment cattle-cluster-agent -n cattle-system --type='json' \
+     -p='[{"op":"add","path":"/spec/template/spec/hostAliases","value":[{"ip":"'"$RANCHER_IP"'","hostnames":["rancher.dev.lan"]}]}]'
+   ```
+
+4. Verify both agents reach Running state:
+
+   ```bash
+   kubectl get pods -n cattle-system | grep cattle-cluster-agent
+   # Both pods should show Running with 0+ restarts
+   ```
+
+---
+
 ## Container Registry Issues
 
 ### Harbor Login Failures
