@@ -482,6 +482,44 @@ Finally, ask it to *"list the files in your working directory"* and confirm the 
   directory. To make it permanent, add the instruction to `/opt/data/SOUL.md`, which Hermes
   injects into every message.
 
+## Managing Who Can Use the Bot
+
+`TELEGRAM_ALLOWED_USERS` is the access list — the bot ignores anyone whose numeric Telegram ID
+isn't in it. To hand the bot to a different person, or add more people, update that one key in the
+`hermes-secrets` Secret and restart the pod.
+
+1. **Get the user's Telegram ID** — have them message [@userinfobot](https://t.me/userinfobot),
+   which replies with their numeric ID.
+
+2. **Patch just the allowlist key** (replace `NEW_TELEGRAM_ID`):
+
+   ```bash
+   kubectl patch secret hermes-secrets -n hermes --type merge \
+     -p "{\"data\":{\"TELEGRAM_ALLOWED_USERS\":\"$(printf 'NEW_TELEGRAM_ID' | base64)\"}}"
+   ```
+
+   For **multiple** users, comma-separate the IDs with no spaces, e.g.
+   `printf '111111111,222222222'`.
+
+3. **Restart so the gateway picks up the change.** Env vars from a Secret are injected at pod
+   start, so a running pod keeps the old value until it restarts:
+
+   ```bash
+   kubectl rollout restart deployment/hermes -n hermes
+   kubectl wait --for=condition=Ready pod -l app=hermes -n hermes --timeout=300s
+   ```
+
+4. **Verify** the value the pod now sees:
+
+   ```bash
+   kubectl exec -n hermes deployment/hermes -- sh -c 'echo "$TELEGRAM_ALLOWED_USERS"'
+   ```
+
+!!! warning "This replaces the list — don't lock yourself out"
+    The patch **overwrites** `TELEGRAM_ALLOWED_USERS`. To keep your own access *and* add someone,
+    include both IDs comma-separated. Listing only their ID removes yours. The same pattern works
+    for rotating any value (`TELEGRAM_BOT_TOKEN`, `MINIMAX_API_KEY`) — patch the key, restart.
+
 ## Security Checklist
 
 Before considering the deployment "safe to experiment with", confirm:
