@@ -243,6 +243,20 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["NET_RAW"]      # block raw sockets / ping-style scanning
+          # Mark the pod Ready only once the gateway has actually connected to Telegram.
+          # The container is "running" long before that (it pulls the image and syncs ~90
+          # bundled skills first), and the ✓-connected line is written to a log FILE, not
+          # stdout — so this exec probe greps that file. Until it passes, `kubectl get pods`
+          # shows the pod as not-Ready and `kubectl rollout status` blocks.
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - grep -q "Gateway running with" /opt/data/logs/gateway.log
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 30      # allow up to ~5 min for first-boot image pull + skill sync
           resources:
             requests:
               memory: "512Mi"
@@ -331,33 +345,77 @@ kubectl apply -f hermes-networkpolicy.yaml
     upstream resolver like Pi-hole sits in a blocked RFC1918 range and the policy interferes,
     scope the DNS rule to the `kube-system` namespace instead. On stock k3s, CoreDNS resolution
     keeps working because cluster-internal traffic is matched by the port-53 rule. Verify with
-    the DNS check in Step 8 and widen only if needed.
+    the DNS check in Step 9 and widen only if needed.
 
-## Step 8: Verify
+## Step 8: Wait Until the Gateway Is Ready
+
+!!! danger "Don't message the bot until it's connected"
+    On first boot the pod pulls a large image and syncs ~90 bundled skills — the gateway only
+    starts polling Telegram **a minute or two after the container is `Running`**. Any message you
+    send *before* it connects is **dropped, not queued**: the gateway discards the pre-startup
+    backlog so it doesn't replay stale messages. This is the single most common reason a first
+    message "gets no reply" — the bot simply wasn't listening yet.
+
+Two signals are **not** reliable readiness indicators:
+
+- `kubectl get pods` showing `1/1 Running` — that's just the container process, not the gateway.
+- The `⚕ Hermes Gateway Starting…` banner in `kubectl logs` — it prints *before* it connects.
+
+The trustworthy "connected and polling" line is `Gateway running with N platform(s)`, written to
+a log **file** inside the pod (`/opt/data/logs/gateway.log`), not to stdout. The `readinessProbe`
+in Step 6 watches exactly that, so the simplest check is the pod's Ready column:
 
 ```bash
-# Pod is running and healthy
+# Once READY shows 1/1, the gateway is connected and safe to message.
 kubectl get pods -n hermes -w
+```
 
-# The gateway connected to Telegram — look for the bot starting / polling
-kubectl logs -n hermes deployment/hermes -f
+Or block until ready right after deploying (handy in scripts):
 
+```bash
+kubectl wait --for=condition=Ready pod -l app=hermes -n hermes --timeout=300s \
+  && echo "✅ Gateway up — safe to message the bot"
+```
+
+To watch the connection happen directly, tail the gateway log file:
+
+```bash
+kubectl exec -n hermes deployment/hermes -- tail -f /opt/data/logs/gateway.log
+# look for:  ✓ telegram connected   /   Gateway running with 1 platform(s)
+```
+
+## Step 9: Verify
+
+```bash
 # The service-account token is NOT mounted (expect "No such file or directory")
 kubectl exec deployment/hermes -n hermes -- \
   ls /var/run/secrets/kubernetes.io/serviceaccount/ 2>&1
 
-# DNS + outbound HTTPS work (Telegram reachable)
+# Confirm which bot the token belongs to — message THIS exact @username, nothing else
+kubectl exec -n hermes deployment/hermes -- sh -c \
+  'python3 -c "import os,urllib.request as u,json; print(json.load(u.urlopen(\"https://api.telegram.org/bot\"+os.environ[\"TELEGRAM_BOT_TOKEN\"]+\"/getMe\"))[\"result\"][\"username\"])"'
+
+# DNS + outbound HTTPS work (Telegram reachable). The image has no wget/curl — use python.
 kubectl exec deployment/hermes -n hermes -- \
-  sh -c 'wget -qO- https://api.telegram.org >/dev/null && echo "telegram reachable"'
+  python3 -c 'import urllib.request as u; u.urlopen("https://api.telegram.org",timeout=10); print("telegram reachable")'
 
 # A homelab service is NOT reachable (expect a timeout / failure)
 kubectl exec deployment/hermes -n hermes -- \
-  sh -c 'wget -qO- --timeout=5 http://192.168.1.206:30002/ 2>&1 || echo "LAN blocked (good)"'
+  python3 -c 'import urllib.request as u; u.urlopen("http://192.168.1.206:30002/",timeout=5)' 2>&1 \
+  | grep -q . && echo "LAN blocked (good)"
 ```
 
-Then the real test: open Telegram, find your bot, and send it a message like *"hello, what can
-you do?"*. It should reply. Ask it to *"list the files in your working directory"* and confirm
-the paths are in-pod (under `/opt/data` / `/app`), **not** your host's filesystem.
+Then the real test: open Telegram, find the bot **by the exact username from `getMe` above**, press
+**Start**, and send a message like *"hello, what can you do?"*. It should reply. Confirm the model
+leg in the logs — you want `provider=minimax`, not a fallback:
+
+```bash
+kubectl exec -n hermes deployment/hermes -- \
+  grep -E "provider=minimax|API call" /opt/data/logs/agent.log | tail -3
+```
+
+Finally, ask it to *"list the files in your working directory"* and confirm the paths are in-pod
+(under `/opt/data`), **not** your host's filesystem.
 
 ## Troubleshooting
 
@@ -372,19 +430,45 @@ the paths are in-pod (under `/opt/data` / `/app`), **not** your host's filesyste
   `runAsNonRoot: true` or `capabilities.drop: ["ALL"]` to the container — see the PSS note in
   Step 6. If a hardening tool injected them, remove them for this workload.
 
+**First message got no reply (but later ones work)**
+
+- Expected if you messaged the bot **before the gateway finished starting** — that message was
+  dropped, not queued (see the Step 8 warning). Wait for the pod to report `Ready`, then send a
+  fresh message. This is *not* a misconfiguration.
+
 **Bot is silent / doesn't reply in Telegram**
 
-- Check the logs: `kubectl logs -n hermes deployment/hermes`.
-- Most common cause: **your user ID isn't in `TELEGRAM_ALLOWED_USERS`**. Re-check the ID from
-  [@userinfobot](https://t.me/userinfobot), update the secret, and roll out a restart.
-- Confirm the token is correct and the bot isn't already running elsewhere (Telegram allows only
-  one long-poller per token — stop any local `hermes gateway` using the same bot).
+- First, confirm the pod is `Ready` (Step 8) — the gateway may still be connecting.
+- Confirm you're messaging the **right bot**. Run the `getMe` check in Step 9 to print the exact
+  `@username` the token belongs to, and message that one. (A token can belong to a different bot
+  than you think — e.g. an older one from a previous experiment.)
+- Check the gateway received anything:
+  `kubectl exec -n hermes deployment/hermes -- python3 -c 'import os,urllib.request as u,json; print(json.load(u.urlopen("https://api.telegram.org/bot"+os.environ["TELEGRAM_BOT_TOKEN"]+"/getWebhookInfo")))'`
+  — a non-empty `url` means a leftover **webhook** is stealing updates from polling; clear it with
+  the same API's `deleteWebhook`.
+- If messages arrive but are ignored: **your user ID isn't in `TELEGRAM_ALLOWED_USERS`**. Re-check
+  the ID from [@userinfobot](https://t.me/userinfobot), update the secret, and roll out a restart.
+- Confirm the bot isn't already running elsewhere (Telegram allows only one long-poller per token —
+  stop any local `hermes gateway` using the same bot).
 
 **Agent replies but model calls fail / fall back**
 
 - A wrong or missing `MINIMAX_API_KEY` makes MiniMax tasks fall back to a default provider and
-  log a warning. Verify the key, and that the pod can reach `https://api.minimax.io` (the Step 8
+  log a warning. Verify the key, and that the pod can reach `https://api.minimax.io` (the Step 9
   HTTPS check). For China-platform accounts, use `MINIMAX_CN_API_KEY` + the `minimax-cn` provider.
+
+**`errors.log` shows `openrouter`/`nous` "payment / credit error" or "no Nous authentication"**
+
+- Harmless. These come from Hermes's **auxiliary** model (used for side tasks like auto-titling a
+  chat), which probes OpenRouter/Nous first. With no keys for those, it logs a warning and falls
+  back to your main provider — you'll see `Auxiliary auto-detect: using main provider minimax`.
+  To silence the noise, add an `OPENROUTER_API_KEY` to the secret or ignore it.
+
+**Bot replies "No home channel is set… type `/sethome`"**
+
+- Expected on first contact, not an error. A "home channel" is only where Hermes delivers
+  *unsolicited* output (cron-job results, cross-platform messages). For normal chat you can ignore
+  it; send `/sethome` in the chat if you want scheduled output delivered there.
 
 **Want to reconfigure interactively**
 
