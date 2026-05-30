@@ -1,57 +1,60 @@
-# Running Hermes Agent in k3s (sandboxed, with LM Studio)
+# Running Hermes Agent in k3s (sandboxed, Telegram + MiniMax)
 
-This guide walks through deploying [Hermes Agent](https://github.com/nousresearch/hermes-agent)
-— Nous Research's self-improving AI agent — inside the homelab k3s cluster, and wiring it to a
-local model served by **LM Studio** running on a workstation.
+This guide deploys [Hermes Agent](https://github.com/NousResearch/hermes-agent) — Nous Research's
+self-improving AI agent — into the homelab k3s cluster as a **Telegram bot** backed by the
+**MiniMax** cloud model. You chat with the agent from Telegram on any device; the agent itself
+runs locked inside an isolated namespace.
 
 The goal is **isolation**. Hermes autonomously executes shell commands and writes its own
-"skills" to disk. Running it in a hardened pod keeps that activity inside a disposable container
-instead of on a personal machine: if the agent misbehaves, you delete the pod and redeploy.
+"skills" to disk. Running it in a hardened, network-restricted pod keeps that activity inside a
+disposable container instead of on a personal machine: if the agent misbehaves, you delete the
+pod and redeploy.
 
-## Why run it in k3s?
+## Why this shape works for isolation
 
-Hermes has *seven* terminal backends that decide **where its shell commands actually run** —
-`local`, `docker`, `ssh`, `singularity`, `modal`, `daytona`, and `vercel`. When you deploy
-Hermes as a pod and leave the backend on `local`, every command the agent runs executes
-**inside that pod** — its own filesystem and namespaces — not on your host.
+Two design choices keep the blast radius small:
 
-That is the isolation we want. But a default pod is **not** a strong security boundary. This
-guide applies four extra controls on top:
+- **Telegram long-polling, not webhooks.** The gateway reaches *out* to `api.telegram.org` to
+  fetch messages — it never accepts an inbound connection. So the pod needs **no Ingress, no
+  exposed port, no LoadBalancer**. You talk to it through Telegram's cloud, not through the
+  cluster network.
+- **MiniMax is a cloud API.** Inference leaves the pod over plain HTTPS to `api.minimax.io`.
+  There is no local model server to wire up and no extra LAN address to open.
 
-| Risk | Control in this guide |
-|------|-----------------------|
-| Agent reaches the Kubernetes API with the pod's service-account token | `automountServiceAccountToken: false` + an unbound ServiceAccount |
-| Agent scans/attacks other homelab services | `NetworkPolicy` that blocks the LAN, allowing only LM Studio |
-| Container escape to the node | Non-root, dropped capabilities, no privilege escalation, `seccomp` |
-| Lost work / corrupted state | Dedicated `PersistentVolumeClaim`, nothing on a `hostPath` |
+Both of the agent's lifelines — Telegram and MiniMax — are **outbound HTTPS to the public
+internet**. That lets the NetworkPolicy below take a hard line: allow DNS and outbound 443, and
+block the entire LAN. The agent can think and chat, but it cannot reach Harbor, Pi-hole, or any
+other homelab service.
+
+Hermes also has *seven* terminal backends that decide **where its shell commands actually run** —
+`local`, `docker`, `ssh`, `singularity`, `modal`, `daytona`, and `vercel`. We keep it on
+`local`, so every command the agent runs executes **inside its own pod**, not on your host.
 
 !!! warning "Keep the terminal backend on `local`"
-    The isolation in this guide only holds while Hermes uses the in-pod `local` backend. If you
-    later switch it to `ssh` (or a cloud sandbox), you hand the agent access to whatever is on
-    the other end. Do not change the backend unless you understand that trade-off.
+    The isolation here only holds while Hermes uses the in-pod `local` backend. If you later
+    switch it to `ssh` (or a cloud sandbox), you hand the agent access to whatever is on the
+    other end. Do not change the backend unless you understand that trade-off.
 
 ## Overview
 
 ```mermaid
 flowchart LR
-    subgraph WS[Workstation]
-        LMS[LM Studio<br/>OpenAI-compatible API<br/>:1234]
-    end
+    You[You on Telegram] -->|messages| TG[Telegram Bot API<br/>api.telegram.org]
     subgraph K3S[k3s cluster]
         subgraph NS[namespace: hermes]
-            POD[Hermes pod<br/>local backend]
+            POD[Hermes gateway pod<br/>local backend]
             PVC[(PVC<br/>config / memory / skills)]
         end
-        NP[NetworkPolicy]
+        NP[NetworkPolicy<br/>egress-only]
     end
-    Admin[You] -->|kubectl exec -it| POD
+    POD -->|long-poll getUpdates| TG
+    POD -->|inference over HTTPS| MM[MiniMax API<br/>api.minimax.io]
     POD --- PVC
-    POD -->|inference requests| LMS
-    NP -.->|blocks LAN<br/>allows only LM Studio + DNS| POD
+    NP -.->|blocks LAN<br/>allows DNS + HTTPS internet| POD
 ```
 
-Inference traffic — and only inference traffic — leaves the pod and reaches LM Studio. LM Studio
-just serves the model; it gives Hermes **no shell access** to the workstation.
+Your message goes to Telegram's cloud; the pod pulls it down on its next poll, runs the agent,
+and pushes the reply back out — all over outbound HTTPS. No traffic ever enters the cluster.
 
 ## Prerequisites
 
@@ -59,68 +62,40 @@ just serves the model; it gives Hermes **no shell access** to the workstation.
   [K8s Cluster Setup](k8s-cluster-setup.md).
 - k3s with its built-in NetworkPolicy controller enabled (the default — do **not** start k3s
   with `--disable-network-policy`).
-- Docker on a build machine, with access to the Harbor registry at
-  `192.168.1.206:30002` — see [Harbor & K8s Deployment](harbor-k8s-deployment.md).
-- Cluster nodes already configured to pull from Harbor's HTTP registry — see
-  [K8s Harbor HTTP Registry Setup](k8s-harbor-http-registry.md).
-- A workstation on the LAN running **LM Studio**, with a known static IP. This guide uses
-  `192.168.1.50` as the placeholder — **replace it with your workstation's IP throughout.**
+- **Cluster nodes can reach the public internet** to pull `nousresearch/hermes-agent` from
+  Docker Hub and to let the agent reach Telegram and MiniMax.
+- A **MiniMax API key** — from the [MiniMax platform](https://www.minimax.io/) console.
+- A **Telegram account** to create the bot and find your user ID (Step 2).
 
-## Step 1: Serve the Model from LM Studio
+## Step 1: Get a MiniMax API Key
 
-By default LM Studio's server only listens on `localhost`, which a pod cannot reach.
+1. Sign in to the MiniMax platform and open the API-keys / console section.
+2. Create an API key and copy it. This is the value for `MINIMAX_API_KEY` below.
+3. Hermes defaults to the global endpoint `https://api.minimax.io`. If your account is on the
+   China platform instead, you'll use `MINIMAX_CN_API_KEY` and the `minimax-cn` provider — adjust
+   the manifests accordingly.
 
-1. Open LM Studio → **Developer** tab (or **Local Server**).
-2. Load a model. A capable agentic model that fits modest hardware is a good start — e.g. a
-   ~5 GB Q4 model. Heavier models give better tool-use behaviour.
-3. **Set the context length to at least 32K tokens.** Hermes's system prompt alone is ~17K
-   tokens, and tool use needs headroom. Per-model: *My Models* → gear icon → context length.
-4. Enable **"Serve on Local Network"** (binds to `0.0.0.0` instead of `127.0.0.1`).
-5. Enable **CORS** if the toggle is present.
-6. Start the server. Note the port — the default is **1234**.
+The model this guide selects is **`MiniMax-M2.7`**, MiniMax's agentic model. You can switch
+later from inside Telegram with `/model`.
 
-Verify it from another machine on the LAN:
+## Step 2: Create the Telegram Bot
 
-```bash
-curl http://192.168.1.50:1234/v1/models
-```
+1. In Telegram, message [@BotFather](https://t.me/BotFather) and send `/newbot`.
+2. Pick a display name and a unique username ending in `bot`.
+3. BotFather replies with an **API token** like `123456789:AAEx...`. This is `TELEGRAM_BOT_TOKEN`.
+4. Find **your own** numeric Telegram user ID: message [@userinfobot](https://t.me/userinfobot).
+   It replies with your ID (a number like `987654321`). This is `TELEGRAM_ALLOWED_USERS`.
 
-You should get a JSON list of loaded models. If the connection is refused, re-check the
-"Serve on Local Network" toggle and the workstation's firewall.
+!!! danger "Always set an allowlist"
+    `TELEGRAM_ALLOWED_USERS` restricts who the bot will respond to. **Never leave it empty** —
+    a bot token is effectively public, and without an allowlist *anyone* who finds your bot can
+    drive a shell-executing agent. Add only your own ID (comma-separate to add more people).
 
-!!! tip "Keep LM Studio reachable"
-    The workstation must be powered on with LM Studio's server running whenever you use Hermes.
-    For an always-available setup, run the model on an always-on host instead of a laptop.
+## Step 3: Namespace, ServiceAccount, and Storage
 
-## Step 2: Build the Hermes Image and Push to Harbor
-
-Hermes ships a `Dockerfile`. Build it on your Docker machine and push the image to Harbor so
-the cluster can pull it.
-
-```bash
-git clone https://github.com/nousresearch/hermes-agent.git
-cd hermes-agent
-
-# Build, tagging for the Harbor registry
-docker build -t 192.168.1.206:30002/library/hermes-agent:latest .
-
-# Log in and push
-docker login 192.168.1.206:30002
-docker push 192.168.1.206:30002/library/hermes-agent:latest
-```
-
-Confirm the `hermes-agent` repository appears in the Harbor web UI under the `library` project.
-
-!!! info "Image internals may change between releases"
-    Hermes is under active development. The container's data paths, default user, and entry
-    command can shift between versions. The manifests below use the paths from the current
-    container layout (`/opt/data` for config/memory/skills, `/app/data` for agent working
-    files); if a Hermes release moves them, adjust the `volumeMounts` accordingly.
-
-## Step 3: Namespace and Storage
-
-Create a dedicated, locked-down namespace and a `PersistentVolumeClaim` for Hermes's state.
-k3s provides the `local-path` StorageClass out of the box.
+Create a dedicated namespace, an unbound ServiceAccount with **no** API access, and a
+`PersistentVolumeClaim` for Hermes's config, memory, and skills. k3s provides the `local-path`
+StorageClass out of the box.
 
 ```yaml title="hermes-namespace-storage.yaml"
 apiVersion: v1
@@ -128,9 +103,13 @@ kind: Namespace
 metadata:
   name: hermes
   labels:
-    # Enforce the strictest Pod Security Standard on this namespace
-    pod-security.kubernetes.io/enforce: restricted
+    # The official image's s6 init starts as root to chown the data volume, then
+    # drops to UID 10000 — so this namespace uses 'baseline', not 'restricted'.
+    # 'restricted' is set to warn/audit so you can see what a rootless rebuild would unlock.
+    pod-security.kubernetes.io/enforce: baseline
     pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/audit: restricted
 ---
 # An unbound ServiceAccount: no RoleBindings, so it grants no cluster access
 apiVersion: v1
@@ -158,10 +137,55 @@ spec:
 kubectl apply -f hermes-namespace-storage.yaml
 ```
 
-## Step 4: The Hardened Deployment
+## Step 4: Store the Secrets
 
-This runs the pod idle (`sleep infinity`) so you can attach an interactive Hermes session with
-`kubectl exec`. The `securityContext` blocks satisfy the `restricted` Pod Security Standard.
+Put the MiniMax key, the Telegram token, and the user allowlist into a Kubernetes `Secret`.
+The Deployment injects these as environment variables, so nothing sensitive is baked into the
+image or the config file.
+
+```bash
+kubectl create secret generic hermes-secrets \
+  --namespace=hermes \
+  --from-literal=MINIMAX_API_KEY='<your-minimax-api-key>' \
+  --from-literal=TELEGRAM_BOT_TOKEN='123456789:AAEx-your-bot-token' \
+  --from-literal=TELEGRAM_ALLOWED_USERS='987654321'
+```
+
+!!! tip "Rotating a token"
+    To change a value later, delete and recreate the secret, then
+    `kubectl rollout restart deployment/hermes -n hermes` to pick it up.
+
+## Step 5: Seed the Agent Config
+
+Hermes reads `config.yaml` from `/opt/data` (its data volume). This `ConfigMap` holds a minimal
+config that selects the MiniMax provider/model and pins the terminal backend to `local`. An
+init container copies it onto the PVC **only if no config exists yet**, so any later changes you
+make from inside Telegram (e.g. `/model`) survive restarts.
+
+```yaml title="hermes-config.yaml"
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermes-config
+  namespace: hermes
+data:
+  config.yaml: |
+    model:
+      provider: minimax
+      default: MiniMax-M2.7
+    terminal:
+      backend: local
+```
+
+```bash
+kubectl apply -f hermes-config.yaml
+```
+
+## Step 6: The Deployment
+
+This runs `gateway run` as the pod's main process — that's the Telegram-facing gateway. The
+image's s6 init starts as root to fix volume ownership, then drops the gateway to UID 10000
+(`hermes`). The init container seeds the config first.
 
 ```yaml title="hermes-deployment.yaml"
 apiVersion: apps/v1
@@ -174,7 +198,7 @@ metadata:
 spec:
   replicas: 1
   strategy:
-    type: Recreate          # single PVC, ReadWriteOnce — no overlapping pods
+    type: Recreate          # single ReadWriteOnce PVC — no overlapping pods
   selector:
     matchLabels:
       app: hermes
@@ -186,76 +210,84 @@ spec:
       serviceAccountName: hermes
       automountServiceAccountToken: false
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000          # makes the PVC writable by the non-root user
+        fsGroup: 10000              # PVC group-owned by the hermes user
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+        - name: seed-config
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              if [ ! -f /opt/data/config.yaml ]; then
+                cp /seed/config.yaml /opt/data/config.yaml
+                echo "seeded config.yaml"
+              else
+                echo "config.yaml already present — leaving as-is"
+              fi
+          volumeMounts:
+            - { name: data, mountPath: /opt/data }
+            - { name: seed, mountPath: /seed }
       containers:
         - name: hermes
-          image: 192.168.1.206:30002/library/hermes-agent:latest
-          imagePullPolicy: IfNotPresent
-          # Keep the pod alive; you attach interactively via kubectl exec
-          command: ["sleep", "infinity"]
+          image: docker.io/nousresearch/hermes-agent:latest
+          imagePullPolicy: Always
+          args: ["gateway", "run"]   # Telegram gateway (long polling); no inbound port needed
+          envFrom:
+            - secretRef:
+                name: hermes-secrets
           securityContext:
+            # NOTE: we do NOT set runAsNonRoot or drop ALL caps — the s6 init needs root
+            # + CHOWN/SETUID/SETGID to set up the volume and drop to UID 10000 itself.
             allowPrivilegeEscalation: false
             capabilities:
-              drop: ["ALL"]
+              drop: ["NET_RAW"]      # block raw sockets / ping-style scanning
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "100m"
+              memory: "512Mi"
+              cpu: "250m"
             limits:
-              memory: "1Gi"
-              cpu: "1000m"
+              memory: "2Gi"
+              cpu: "2000m"
           volumeMounts:
-            - name: data
-              mountPath: /opt/data      # Hermes config, memories, skills
-              subPath: hermes-data
-            - name: data
-              mountPath: /app/data      # agent working files
-              subPath: working-dir
-            - name: tmp
-              mountPath: /tmp
+            - { name: data, mountPath: /opt/data }   # config, memory, skills, .env
+            - { name: tmp,  mountPath: /tmp }
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: hermes-data
+        - name: seed
+          configMap:
+            name: hermes-config
         - name: tmp
           emptyDir: {}
-      imagePullSecrets:
-        - name: harbor-secret
 ```
-
-The deployment references a `harbor-secret` for pulling the image. Create it in the `hermes`
-namespace (same pattern as the [Harbor guide](harbor-k8s-deployment.md)):
-
-```bash
-kubectl create secret docker-registry harbor-secret \
-  --docker-server=192.168.1.206:30002 \
-  --docker-username=<harbor-username> \
-  --docker-password=<harbor-password> \
-  --namespace=hermes
-```
-
-Then apply the deployment:
 
 ```bash
 kubectl apply -f hermes-deployment.yaml
 ```
 
+!!! note "Why not `restricted` PSS + `runAsNonRoot`?"
+    The official image's `/init` (s6-overlay) runs as root so it can `chown` the bind-mounted
+    data volume on first boot, then drops every service — including the gateway — to UID 10000.
+    Forcing `runAsNonRoot: true` or `capabilities.drop: ["ALL"]` breaks that startup. The agent
+    process itself still ends up non-root; we accept a root *init* in exchange for the image
+    working unmodified. The real containment here is the NetworkPolicy, the missing SA token,
+    and the absence of any host mounts — not the in-pod UID. If you rebuild the image to init
+    rootless, tighten this namespace to `restricted`.
+
 !!! note "`readOnlyRootFilesystem` is intentionally omitted"
     A self-improving agent installs dependencies for the skills it writes (pip/npm packages),
     which a read-only root filesystem would break. The PVC and an `emptyDir` for `/tmp` cover
-    the writable paths the agent needs; the rest of the container is still ephemeral and reset
-    on every redeploy.
+    the writable paths; the rest of the container is ephemeral and reset on every redeploy.
 
-## Step 5: Lock Down the Network
+## Step 7: Lock Down the Network
 
-This is the control that stops the agent from touching the rest of the homelab. The policy
-denies **all inbound** traffic and allows outbound only to DNS, LM Studio, and the public
-internet — explicitly **not** the LAN.
+This is the control that stops the agent from touching the rest of the homelab. It denies **all
+inbound** traffic (the gateway never needs any) and allows outbound only to DNS and HTTPS on the
+public internet — explicitly **not** the LAN. That HTTPS rule is what lets the agent reach both
+Telegram and MiniMax.
 
 ```yaml title="hermes-networkpolicy.yaml"
 apiVersion: networking.k8s.io/v1
@@ -270,20 +302,14 @@ spec:
   policyTypes:
     - Ingress
     - Egress
-  # No inbound connections at all — you only reach the agent via kubectl exec
+  # No inbound connections at all — long polling means the pod only reaches out.
   ingress: []
   egress:
     # DNS resolution
     - ports:
         - { protocol: UDP, port: 53 }
         - { protocol: TCP, port: 53 }
-    # LM Studio on the workstation — the ONLY LAN address allowed
-    - to:
-        - ipBlock:
-            cidr: 192.168.1.50/32
-      ports:
-        - { protocol: TCP, port: 1234 }
-    # Public internet (for skill dependencies), but NOT private LAN ranges
+    # Public internet over HTTPS (Telegram + MiniMax), but NOT the private LAN
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
@@ -300,113 +326,88 @@ spec:
 kubectl apply -f hermes-networkpolicy.yaml
 ```
 
-!!! tip "Want a fully offline agent?"
-    For a strict local-only experiment, **delete the public-internet egress rule**. Hermes will
-    then reach only LM Studio and DNS. The trade-off: skills that need to download packages will
-    fail. Add the rule back when you need it.
+!!! warning "DNS may live on your LAN"
+    The egress rule above allows DNS to any destination. If your cluster's DNS (CoreDNS) or an
+    upstream resolver like Pi-hole sits in a blocked RFC1918 range and the policy interferes,
+    scope the DNS rule to the `kube-system` namespace instead. On stock k3s, CoreDNS resolution
+    keeps working because cluster-internal traffic is matched by the port-53 rule. Verify with
+    the DNS check in Step 8 and widen only if needed.
 
-## Step 6: Run Hermes Interactively
-
-Attach an interactive shell to the pod and launch the agent:
-
-```bash
-# Wait for the pod to be Running
-kubectl get pods -n hermes -w
-
-# Attach an interactive session
-kubectl exec -it deployment/hermes -n hermes -- hermes
-```
-
-On first launch, Hermes runs its **setup wizard**. When it asks for the model provider:
-
-1. Choose **LM Studio** (or **Custom endpoint** if LM Studio is not offered).
-2. For the base URL, enter your workstation's address — **not** `localhost`:
-
-   ```
-   http://192.168.1.50:1234/v1
-   ```
-
-3. Leave the API key blank (or any placeholder — LM Studio ignores it).
-4. Enter the model name exactly as LM Studio reports it (from the `Step 1` `curl` output).
-
-The wizard writes `config.yaml` into `/opt/data`, which lives on the PVC — so the configuration
-**survives pod restarts**. You can also pre-set it without the wizard:
-
-```yaml title="/opt/data/config.yaml (excerpt)"
-model:
-  default: your-model-name
-  provider: lmstudio
-  base_url: http://192.168.1.50:1234/v1
-  context_length: 32768
-```
-
-Useful in-session commands: `/model` to switch provider or model, `/reset` to clear the chat.
-
-## Step 7: Verify
-
-Run these checks to confirm the deployment and its guardrails:
+## Step 8: Verify
 
 ```bash
 # Pod is running and healthy
-kubectl get pods -n hermes
+kubectl get pods -n hermes -w
+
+# The gateway connected to Telegram — look for the bot starting / polling
+kubectl logs -n hermes deployment/hermes -f
 
 # The service-account token is NOT mounted (expect "No such file or directory")
 kubectl exec deployment/hermes -n hermes -- \
   ls /var/run/secrets/kubernetes.io/serviceaccount/ 2>&1
 
-# LM Studio IS reachable from the pod
+# DNS + outbound HTTPS work (Telegram reachable)
 kubectl exec deployment/hermes -n hermes -- \
-  curl -s http://192.168.1.50:1234/v1/models
+  sh -c 'wget -qO- https://api.telegram.org >/dev/null && echo "telegram reachable"'
 
-# Another homelab service is NOT reachable (expect a timeout / failure)
+# A homelab service is NOT reachable (expect a timeout / failure)
 kubectl exec deployment/hermes -n hermes -- \
-  curl -s --max-time 5 http://192.168.1.206:30002/ 2>&1
+  sh -c 'wget -qO- --timeout=5 http://192.168.1.206:30002/ 2>&1 || echo "LAN blocked (good)"'
 ```
 
-Inside a `hermes` session, ask the agent to run a harmless command (e.g. *"list the files in the
-current directory"*) and confirm it operates inside the pod — paths like `/app/data`, not your
-host's filesystem.
+Then the real test: open Telegram, find your bot, and send it a message like *"hello, what can
+you do?"*. It should reply. Ask it to *"list the files in your working directory"* and confirm
+the paths are in-pod (under `/opt/data` / `/app`), **not** your host's filesystem.
 
 ## Troubleshooting
 
 **Pod stuck in `ImagePullBackOff`**
 
-- Confirm `harbor-secret` exists in the `hermes` namespace.
-- Confirm cluster nodes are configured for Harbor's HTTP registry — see
-  [K8s Harbor HTTP Registry Setup](k8s-harbor-http-registry.md).
+- Confirm the cluster nodes can reach Docker Hub: `docker pull nousresearch/hermes-agent` from a
+  node. If you pull through a registry mirror, mirror this image too.
 
-**Pod stuck in `CreateContainerConfigError` or fails Pod Security admission**
+**Pod crash-loops on startup with a permissions or s6 error**
 
-- The image may default to root. Check with `docker run --rm --entrypoint id <image>`. If it
-  is not UID 1000, adjust `runAsUser`/`runAsGroup`/`fsGroup` to match a non-root user the image
-  provides, or rebuild the image with a non-root user.
+- The image needs its root `/init` to set up the volume. Make sure you did **not** add
+  `runAsNonRoot: true` or `capabilities.drop: ["ALL"]` to the container — see the PSS note in
+  Step 6. If a hardening tool injected them, remove them for this workload.
 
-**Hermes cannot reach the model**
+**Bot is silent / doesn't reply in Telegram**
 
-- From the pod: `kubectl exec deployment/hermes -n hermes -- curl http://192.168.1.50:1234/v1/models`.
-- If it fails: check the `ipBlock` CIDR in the NetworkPolicy matches the workstation IP, that
-  LM Studio's "Serve on Local Network" is on, and the workstation firewall allows port 1234.
+- Check the logs: `kubectl logs -n hermes deployment/hermes`.
+- Most common cause: **your user ID isn't in `TELEGRAM_ALLOWED_USERS`**. Re-check the ID from
+  [@userinfobot](https://t.me/userinfobot), update the secret, and roll out a restart.
+- Confirm the token is correct and the bot isn't already running elsewhere (Telegram allows only
+  one long-poller per token — stop any local `hermes gateway` using the same bot).
+
+**Agent replies but model calls fail / fall back**
+
+- A wrong or missing `MINIMAX_API_KEY` makes MiniMax tasks fall back to a default provider and
+  log a warning. Verify the key, and that the pod can reach `https://api.minimax.io` (the Step 8
+  HTTPS check). For China-platform accounts, use `MINIMAX_CN_API_KEY` + the `minimax-cn` provider.
+
+**Want to reconfigure interactively**
+
+- You can run the wizard inside the pod: `kubectl exec -it deployment/hermes -n hermes -- hermes
+  gateway setup` (Telegram) or `hermes setup` (model/provider). Changes land in `/opt/data` on
+  the PVC and survive restarts.
 
 **Agent reports it "has no file access"**
 
-- This is a known Hermes quirk. Tell it once, in-session, that it has full read/write access to
-  `/app/data`. To make that permanent, add the instruction to `/opt/data/SOUL.md`, which Hermes
+- A known Hermes quirk. Tell it once, in-chat, that it has full read/write access to its working
+  directory. To make it permanent, add the instruction to `/opt/data/SOUL.md`, which Hermes
   injects into every message.
-
-**Context-length / truncation errors**
-
-- The model's context window is too small. Raise it to 32K in LM Studio and set
-  `context_length: 32768` in `config.yaml`.
 
 ## Security Checklist
 
 Before considering the deployment "safe to experiment with", confirm:
 
 - [ ] Terminal backend is `local` (commands run in-pod).
+- [ ] `TELEGRAM_ALLOWED_USERS` is set to your ID(s) — the bot ignores everyone else.
 - [ ] `automountServiceAccountToken: false` and the ServiceAccount has **no** RoleBindings.
 - [ ] NetworkPolicy is applied; the pod **cannot** reach other homelab services.
-- [ ] Pod runs non-root, with `allowPrivilegeEscalation: false` and all capabilities dropped.
-- [ ] No `hostPath` mounts, no `privileged`, no `hostNetwork`.
+- [ ] No `hostPath` mounts, no `privileged`, no `hostNetwork`, no exposed Ingress/port.
+- [ ] Secrets live in a `Secret`, not in the image or `config.yaml`.
 - [ ] State lives on a PVC — the pod itself is disposable.
 
 ## Tear-Down
@@ -417,14 +418,25 @@ Because everything is namespaced, removing Hermes is one command:
 kubectl delete namespace hermes
 ```
 
-This deletes the deployment, NetworkPolicy, ServiceAccount, and — note — the PVC and all of the
-agent's memories and skills. Back up the PVC contents first if you want to keep them.
+This deletes the Deployment, NetworkPolicy, ServiceAccount, ConfigMap, Secret, and — note — the
+PVC and all of the agent's memories and skills. Back up the PVC contents first if you want to
+keep them. You may also want to delete or revoke the bot via [@BotFather](https://t.me/BotFather)
+(`/deletebot`) and rotate the MiniMax key.
 
 ---
 
 ## Summary
 
-This guide deployed Hermes Agent into k3s as a hardened, network-isolated pod and connected it
-to a local LM Studio model. The agent runs its shell commands inside a disposable container,
-cannot reach the Kubernetes API or the rest of the homelab, and keeps its state on a dedicated
-volume — a far safer place to experiment with an autonomous agent than a personal workstation.
+This guide deployed Hermes Agent into k3s as a hardened, egress-only Telegram bot backed by the
+MiniMax cloud model. You drive it from Telegram — restricted to an allowlist of user IDs — while
+the agent runs its shell commands inside a disposable container that cannot reach the Kubernetes
+API or the rest of the homelab, and keeps its state on a dedicated volume. A far safer place to
+experiment with an autonomous agent than a personal workstation.
+
+## References
+
+- [Hermes Agent docs](https://hermes-agent.nousresearch.com/docs/) — gateway, providers, secrets
+- [Hermes Agent repo](https://github.com/NousResearch/hermes-agent)
+- [Harbor & K8s Deployment](harbor-k8s-deployment.md) — registry / pull-secret pattern (if you
+  later mirror the image into Harbor)
+- [Borra Bot Journal on k3s](borra-bot-journal-deployment.md) — sibling bot deployment
